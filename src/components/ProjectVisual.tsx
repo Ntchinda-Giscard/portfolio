@@ -55,9 +55,9 @@ function Integration() {
   return (
     <div className={s.stage} aria-hidden="true">
       <svg className={s.wires} viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path d="M37 19 C 41 19, 40 29, 44 29" />
-        <path d="M37 45 C 41 45, 40 35, 44 35" />
-        <path d="M66 32 L 73 32" />
+        <path d="M33 18 C 37 18, 36 28, 40 28" />
+        <path d="M33 44 C 37 44, 36 34, 40 34" />
+        <path d="M65 30 L 70 30" />
       </svg>
 
       <div className={`${s.node} ${s.x3}`}>
@@ -83,7 +83,7 @@ function Integration() {
             <i key={i} data-state={i < 6 ? "done" : i === 6 ? "active" : undefined} />
           ))}
         </div>
-        <p className={s.stateLabel}>state 7 / 9 · sent</p>
+        <p className={s.stateLabel}>state 7/9 · sent</p>
       </div>
 
       <div className={s.log}>
@@ -164,6 +164,14 @@ function Ledger() {
             <Check /> Balanced
           </b>
         </p>
+      </div>
+
+      <div className={s.edited}>
+        <span className={s.avatar}>AC</span>
+        <span>
+          <b>Formula updated by Accounting</b>
+          <small>Live in seconds · no code change</small>
+        </span>
       </div>
 
       <div className={s.rule}>

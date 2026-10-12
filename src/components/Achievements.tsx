@@ -71,34 +71,33 @@ export default function Achievements() {
             {achievements.map((item, i) => {
               const Icon = ICONS[item.icon ?? "trophy"];
               return (
-              <li key={item.name} className={styles.card}>
-                <span className={styles.count}>
-                  {pad(i + 1)} / {pad(achievements.length)}
-                </span>
-                <span className={styles.icon}>
-                  {item.logo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- small local SVG logos
-                    <img src={`/logos/${item.logo}.svg`} alt="" width={30} height={30} loading="lazy" />
-                  ) : item.icon === "flag" ? (
-                    <Flag />
-                  ) : (
-                    <Trophy />
-                  )}
-                </span>
-                <div className={styles.bottom}>
-                  <div>
-                    <h3 className={styles.name}>{item.name}</h3>
-                    <p className={styles.label}>{item.label}</p>
-                    <p className={styles.desc}>{item.description}</p>
+                <li key={item.name} className={styles.card}>
+                  <span className={styles.count}>
+                    {pad(i + 1)} / {pad(achievements.length)}
+                  </span>
+                  <span className={styles.icon}>
+                    {item.logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- small local SVG logos
+                      <img src={`/logos/${item.logo}.svg`} alt="" width={30} height={30} loading="lazy" />
+                    ) : (
+                      <Icon />
+                    )}
+                  </span>
+                  <div className={styles.bottom}>
+                    <div>
+                      <h3 className={styles.name}>{item.name}</h3>
+                      <p className={styles.label}>{item.label}</p>
+                      <p className={styles.desc}>{item.description}</p>
+                    </div>
+                    <p className={styles.value}>
+                      {item.prefix && <span className={styles.prefix}>{item.prefix}</span>}
+                      {item.value}
+                      {item.suffix && <span className={styles.suffix}>{item.suffix}</span>}
+                    </p>
                   </div>
-                  <p className={styles.value}>
-                    {item.prefix && <span className={styles.prefix}>{item.prefix}</span>}
-                    {item.value}
-                    {item.suffix && <span className={styles.suffix}>{item.suffix}</span>}
-                  </p>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
             <li className={styles.end}>
               <span>and counting</span>
               <a href="#contact" aria-label="Get in touch">

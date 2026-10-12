@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { certifications, certificationsIntro } from "@/content/portfolio";
+import { certifications, certificationsAll, certificationsIntro } from "@/content/portfolio";
 import { pad } from "@/lib/utils";
 import { ArrowUpRight, Eyebrow } from "./ui";
 import styles from "./Certifications.module.css";
@@ -18,6 +18,11 @@ export default function Certifications() {
           <p className={styles.intro} data-reveal>
             {certificationsIntro}
           </p>
+          {certificationsAll && (
+            <a className={styles.all} href={certificationsAll} target="_blank" rel="noreferrer" data-reveal>
+              See all on LinkedIn <ArrowUpRight />
+            </a>
+          )}
         </div>
 
         <ol className={styles.list}>

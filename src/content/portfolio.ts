@@ -326,7 +326,7 @@ export type Achievement = {
 
 export const achievements: Achievement[] = [
   {
-    name: "Camair-AI Ultrasound Challenge",
+    name: "Camair-AI Challenge",
     label: "Final ranking",
     description: "Cameroon Advanced Analytics ultrasound image challenge.",
     value: "5",

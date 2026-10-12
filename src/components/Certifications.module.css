@@ -21,6 +21,33 @@
   color: var(--ink-3);
 }
 
+.all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line-strong);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color 0.3s ease;
+}
+
+.all svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.all:hover {
+  border-color: var(--ink);
+}
+
+.all:hover svg {
+  transform: translate(2px, -2px);
+}
+
 .list {
   border-top: 1px solid var(--line);
 }

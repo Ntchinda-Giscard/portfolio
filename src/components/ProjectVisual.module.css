@@ -186,36 +186,37 @@
 .node small {
   font-family: var(--font-mono);
   font-size: 7.5px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .x3 {
-  top: 11%;
+  top: 13%;
   left: 6%;
-  width: 31%;
+  width: 27%;
 }
 
 .hrm {
-  top: 37%;
+  top: 39%;
   left: 6%;
-  width: 31%;
+  width: 27%;
 }
 
 .capi {
-  top: 23%;
-  right: 6%;
-  width: 21%;
+  top: 25%;
+  left: 70%;
+  width: 24%;
   border-left-color: var(--ok);
 }
 
 .hub {
   composes: card;
   position: absolute;
-  top: 18%;
-  left: 44%;
-  width: 22%;
+  top: 21%;
+  left: 40%;
+  width: 25%;
   padding: 12px;
   background: var(--accent);
   color: #fff;
@@ -232,7 +233,8 @@
 .stateLabel {
   font-family: var(--font-mono);
   font-size: 7.5px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
   text-transform: uppercase;
   opacity: 0.65;
 }
@@ -524,6 +526,45 @@
   height: 12px;
 }
 
+.edited {
+  composes: card;
+  position: absolute;
+  bottom: 9%;
+  left: 6%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 46%;
+  padding: 11px 12px;
+  animation: float 5.5s var(--ease-in-out) infinite alternate-reverse;
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-sunk);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.edited b {
+  display: block;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.edited small {
+  display: block;
+  margin-top: 1px;
+  font-size: 9.5px;
+  color: var(--muted);
+}
+
 .rule {
   composes: card;
   position: absolute;
@@ -573,7 +614,10 @@
 
   .wires,
   .capi,
-  .log li span:first-child {
+  .edited,
+  .rule,
+  .log li span:first-child,
+  .log li:nth-child(n + 4) {
     display: none;
   }
 
@@ -582,9 +626,26 @@
     width: 40%;
   }
 
+  .x3 {
+    top: 6%;
+  }
+
+  .hrm {
+    top: 25%;
+  }
+
   .hub {
+    top: 10%;
     left: 52%;
     width: 42%;
+  }
+
+  .log {
+    bottom: 5%;
+  }
+
+  .log li {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .table th:nth-child(2),

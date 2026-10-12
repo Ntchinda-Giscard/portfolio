@@ -6,8 +6,9 @@
 }
 
 .intro {
-  max-width: 21em;
+  max-width: 23em;
   padding-bottom: 12px;
+  text-wrap: pretty;
   font-size: 14px;
   text-align: right;
   color: var(--ink-3);
@@ -303,7 +304,7 @@
   }
 
   .visual {
-    min-height: 340px;
+    min-height: 440px;
   }
 }
 
