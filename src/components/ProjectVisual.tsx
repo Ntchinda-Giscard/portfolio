@@ -45,8 +45,8 @@ function KamJob() {
 /* ------------------------------------------------------------- WAZALINK */
 
 const LOG = [
-  { time: "12:04:09", record: "pesee #4821", status: "skip", text: "sha256 unchanged" },
-  { time: "12:04:11", record: "bon_livraison #118", status: "retry", text: "retry 2 · backoff 4s" },
+  { time: "12:04:09", record: "pesee #4821", status: "skip", text: "unchanged · skip" },
+  { time: "12:04:11", record: "bon_livraison #118", status: "retry", text: "retry #2 · next run" },
   { time: "12:04:15", record: "planteur #77", status: "ok", text: "synced" },
   { time: "12:04:18", record: "bon_livraison #118", status: "ok", text: "synced" },
 ];
@@ -66,7 +66,7 @@ function Integration() {
       </div>
       <div className={`${s.node} ${s.hrm}`}>
         <b>Sage HRM</b>
-        <small>SOAP · HR</small>
+        <small>SQL · HR</small>
       </div>
       <div className={`${s.node} ${s.capi}`}>
         <b>CAPI</b>
@@ -179,7 +179,7 @@ function Ledger() {
         <pre>{`{
   "debit": "4711",
   "credit": "5121",
-  "tolerance": 0
+  "tolerance": 0.01
 }`}</pre>
       </div>
     </div>

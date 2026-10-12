@@ -131,8 +131,9 @@ export type Project = {
   features: string[];
   tech: Tech[];
   moreTech: number;
-  /** Public link for the button; leave out for private work and set `note` instead. */
+  /** Button link: an external URL (opens in a new tab) or an internal case-study route ("/projects/…"). */
   link?: { label: string; href: string };
+  /** Small print beside the button, e.g. for private repositories. */
   note?: string;
   visual: "kamjob" | "integration" | "ledger";
 };
@@ -167,8 +168,8 @@ export const projects: Project[] = [
       "Middleware that keeps Sage X3, Sage HRM and a field app in sync over SOAP and REST, running on Kubernetes. It replaced a legacy middleware and tracks every transfer so retries never lose or duplicate a record.",
     features: [
       "9-state idempotent pipeline",
-      "Retries with exponential backoff",
-      "SHA-256 change detection",
+      "Circuit breaker & safe retries",
+      "Change-only sync, no duplicates",
       "6 critical business flows",
     ],
     tech: [
@@ -182,7 +183,8 @@ export const projects: Project[] = [
       { name: "Sentry", logo: "sentry" },
     ],
     moreTech: 3,
-    note: "Client project · private repository",
+    link: { label: "Read the case study", href: "/projects/wazalink" },
+    note: "Private client repository",
     visual: "integration",
   },
   {
@@ -202,10 +204,11 @@ export const projects: Project[] = [
       { name: "React", logo: "react" },
       { name: "TypeScript", logo: "typescript" },
       { name: "Tailwind CSS", logo: "tailwindcss" },
-      { name: "Python", logo: "python" },
+      { name: "Rust" },
     ],
     moreTech: 0,
-    note: "Client project · private repository",
+    link: { label: "Read the case study", href: "/projects/ledgersync" },
+    note: "Private client repository",
     visual: "ledger",
   },
 ];

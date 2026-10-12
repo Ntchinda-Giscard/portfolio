@@ -197,6 +197,8 @@ export default function HeroStage({ video: src, poster, name }: Props) {
       video.removeEventListener("play", sync);
       video.removeEventListener("pause", sync);
       video.removeEventListener("ended", onEnded);
+      // Routes stay mounted but hidden after navigation; don't keep playing (or talking) offstage.
+      video.pause();
     };
   }, []);
 

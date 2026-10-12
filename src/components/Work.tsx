@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { projects, workIntro } from "@/content/portfolio";
 import { useMediaQuery } from "@/lib/hooks";
 import { cx, pad } from "@/lib/utils";
 import ProjectVisual from "./ProjectVisual";
-import { ArrowUpRight, Eyebrow, Plus } from "./ui";
+import { ArrowRight, ArrowUpRight, Eyebrow, Plus } from "./ui";
 import styles from "./Work.module.css";
 
 /** Width of a closed panel and the gap between panels, in px. */
@@ -107,12 +108,21 @@ export default function Work() {
                       ))}
                       {project.moreTech > 0 && <li className={styles.more}>+{project.moreTech}</li>}
                     </ul>
-                    {project.link ? (
-                      <a className={cx("btn btn-dark", styles.cta)} href={project.link.href} target="_blank" rel="noreferrer">
-                        {project.link.label} <ArrowUpRight className="arrow-ne" />
-                      </a>
-                    ) : (
-                      project.note && <p className={styles.note}>{project.note}</p>
+                    {(project.link || project.note) && (
+                      <div className={styles.actions}>
+                        {project.link?.href.startsWith("/") ? (
+                          <Link className="btn btn-dark" href={project.link.href}>
+                            {project.link.label} <ArrowRight className="arrow-r" />
+                          </Link>
+                        ) : (
+                          project.link && (
+                            <a className="btn btn-dark" href={project.link.href} target="_blank" rel="noreferrer">
+                              {project.link.label} <ArrowUpRight className="arrow-ne" />
+                            </a>
+                          )
+                        )}
+                        {project.note && <p className={styles.note}>{project.note}</p>}
+                      </div>
                     )}
                   </div>
                   <div className={styles.visual}>
