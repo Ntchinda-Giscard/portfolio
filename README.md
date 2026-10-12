@@ -15,7 +15,7 @@ The round **N** badge in the bottom-left corner only appears in `npm run dev`. I
 
 ## Make it yours
 
-All text and numbers live in **`src/content/portfolio.ts`**: your name, role, links, facts, skills, projects, certifications, timeline and achievements. The values in it now are samples. Replace them before you publish.
+All text and numbers live in **`src/content/portfolio.ts`**: your name, role, links, facts, skills, projects, certifications, timeline and achievements. Edit that one file to update the site.
 
 - **Résumé:** put your PDF at `public/resume.pdf`. Every "Résumé" button links there.
 - **Logos:** the skill tiles and tech chips use the SVGs in `public/logos`. Add a new one by dropping `name.svg` in that folder and referencing it as `logo: "name"`.
