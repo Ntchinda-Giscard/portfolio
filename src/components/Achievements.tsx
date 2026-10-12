@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { achievements } from "@/content/portfolio";
 import { useMediaQuery, useScrollFrame } from "@/lib/hooks";
 import { clamp, cx, pad } from "@/lib/utils";
-import { ArrowRight, Eyebrow, Flag, Trophy } from "./ui";
+import { ArrowRight, Eyebrow, Flag, Flow, Scale, Shield, Spark, Trophy } from "./ui";
 import styles from "./Achievements.module.css";
+
+const ICONS = { trophy: Trophy, flag: Flag, shield: Shield, spark: Spark, scale: Scale, flow: Flow };
 
 /** Vertical scroll drives a horizontal card track while the section is pinned. */
 export default function Achievements() {
@@ -66,7 +68,9 @@ export default function Achievements() {
 
         <div className={styles.viewport}>
           <ol ref={trackRef} className={styles.track}>
-            {achievements.map((item, i) => (
+            {achievements.map((item, i) => {
+              const Icon = ICONS[item.icon ?? "trophy"];
+              return (
               <li key={item.name} className={styles.card}>
                 <span className={styles.count}>
                   {pad(i + 1)} / {pad(achievements.length)}

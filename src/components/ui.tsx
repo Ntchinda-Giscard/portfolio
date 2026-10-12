@@ -103,6 +103,35 @@ export const Trophy = (p: IconProps) => (
   </Icon>
 );
 
+export const Shield = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.6-7 9-4.1-1.4-7-4.7-7-9V6l7-2.5Z" />
+    <path d="m9 12 2.2 2.2L15.5 10" />
+  </Icon>
+);
+
+export const Spark = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5c.6 4.4 2.6 6.9 7.5 8.5-4.9 1.6-6.9 4.1-7.5 8.5-.6-4.4-2.6-6.9-7.5-8.5 4.9-1.6 6.9-4.1 7.5-8.5Z" />
+    <path d="M19 3.5v3M17.5 5h3" />
+  </Icon>
+);
+
+export const Scale = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 4v16M7 20h10M5 7h14M12 4l-1 3h2l-1-3Z" />
+    <path d="m5 7-2.5 6a2.5 2.5 0 0 0 5 0L5 7ZM19 7l-2.5 6a2.5 2.5 0 0 0 5 0L19 7Z" />
+  </Icon>
+);
+
+export const Flow = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3.5" y="4" width="6" height="5" rx="1.5" />
+    <rect x="14.5" y="15" width="6" height="5" rx="1.5" />
+    <path d="M9.5 6.5h3a2 2 0 0 1 2 2v6.5M12.5 13l2 2 2-2" />
+  </Icon>
+);
+
 export const Flag = (p: IconProps) => (
   <Icon {...p}>
     <path d="M6 21V4M6 4.5c4-2 6 2 12 0v9c-6 2-8-2-12 0" />
