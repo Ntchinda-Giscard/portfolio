@@ -1,0 +1,256 @@
+.timeline {
+  --year: clamp(48px, 5.6vw, 88px);
+  --pad: clamp(28px, 4vw, 52px);
+  position: relative;
+  margin-top: clamp(48px, 7vw, 88px);
+}
+
+.rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: scaleY(var(--progress, 0));
+  transform-origin: top;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(56px, 8vw, 128px);
+  align-items: start;
+  padding-block: var(--pad);
+}
+
+.year {
+  font-size: var(--year);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+  color: var(--ink);
+}
+
+.nextYear {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink-2);
+}
+
+.item[data-side="left"] .card,
+.item[data-side="left"] .nextCard {
+  grid-row: 1;
+  grid-column: 1;
+  justify-self: end;
+}
+
+.item[data-side="left"] .year {
+  grid-row: 1;
+  grid-column: 2;
+  justify-self: start;
+}
+
+.item[data-side="right"] .year {
+  grid-row: 1;
+  grid-column: 1;
+  justify-self: end;
+}
+
+.item[data-side="right"] .card,
+.item[data-side="right"] .nextCard {
+  grid-row: 1;
+  grid-column: 2;
+  justify-self: start;
+}
+
+.dot {
+  position: absolute;
+  top: calc(var(--pad) + var(--year) * 0.42);
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 6px var(--bg);
+}
+
+/* --------------------------------------------------------------- cards */
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  padding: 26px 28px 28px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-card);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kind {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kindPill {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+}
+
+.range {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.title {
+  margin-top: 16px;
+  font-size: clamp(22px, 1.9vw, 28px);
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.place {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.points {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.points li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.points li::before {
+  content: "";
+  position: absolute;
+  top: 0.6em;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.metric {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.metric span {
+  margin-right: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 12px;
+  color: var(--on-accent);
+}
+
+.badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.tags li {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--bg-sunk);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.nextCard {
+  max-width: 420px;
+  padding-top: 6px;
+}
+
+.nextCard :global(.btn) {
+  margin-top: 20px;
+}
+
+@media (max-width: 800px) {
+  .rail {
+    left: 5px;
+  }
+
+  .item {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 16px;
+    padding-left: 34px;
+  }
+
+  .item[data-side] .year,
+  .item[data-side] .card,
+  .item[data-side] .nextCard {
+    grid-row: auto;
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .dot {
+    left: 5px;
+  }
+}

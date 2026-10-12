@@ -1,0 +1,524 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  font-size: 11px;
+  color: var(--ink-2);
+}
+
+.stage p {
+  margin: 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow:
+    0 1px 2px rgb(29 28 44 / 0.06),
+    0 24px 44px -26px rgb(29 28 44 / 0.4);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* -------------------------------------------------------- document scan */
+
+.paper {
+  composes: card;
+  position: absolute;
+  top: 11%;
+  bottom: 13%;
+  left: 10%;
+  width: 52%;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.paperHead {
+  composes: mono;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.lines {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.lines i {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: #ebe8e1;
+}
+
+.lines i[data-flag="high"] {
+  height: 6px;
+  background: var(--accent);
+}
+
+.lines i[data-flag="med"] {
+  height: 6px;
+  background: #8b8088;
+}
+
+.scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 46px;
+  background: linear-gradient(180deg, transparent, rgb(142 139 180 / 0.2));
+  border-bottom: 1px solid rgb(142 139 180 / 0.65);
+  animation: scan 3.4s var(--ease-in-out) infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-50px);
+  }
+  100% {
+    transform: translateY(420px);
+  }
+}
+
+.callout {
+  composes: card;
+  position: absolute;
+  right: 6%;
+  width: 34%;
+  padding: 11px 12px 11px 14px;
+  border-left: 3px solid var(--accent);
+  font-size: 10.5px;
+  line-height: 1.35;
+  animation: float 5s var(--ease-in-out) infinite alternate;
+}
+
+.callout b,
+.gauge small,
+.legend p,
+.appBar span,
+.look p {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.callout b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.high {
+  top: 15%;
+}
+
+.med {
+  top: 37%;
+  border-left-color: #8b8088;
+  animation-delay: -2.5s;
+}
+
+.gauge {
+  composes: card;
+  position: absolute;
+  right: 9%;
+  bottom: 13%;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+}
+
+.gauge svg {
+  position: absolute;
+  inset: 8px;
+  transform: rotate(-90deg);
+}
+
+.gaugeTrack,
+.gaugeValue {
+  fill: none;
+  stroke-width: 6;
+}
+
+.gaugeTrack {
+  stroke: #ece9e2;
+}
+
+.gaugeValue {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 72 100;
+  animation: gauge 2.4s var(--ease-out) both;
+}
+
+@keyframes gauge {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+
+.gauge span {
+  display: grid;
+  justify-items: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.gauge small {
+  margin-bottom: 3px;
+  font-size: 7px;
+  letter-spacing: 0.24em;
+}
+
+.caption {
+  composes: mono;
+  position: absolute;
+  left: 10%;
+  bottom: 5%;
+}
+
+/* -------------------------------------------------------------- heatmap */
+
+.board {
+  composes: card;
+  position: absolute;
+  top: 50%;
+  left: 9%;
+  right: 17%;
+  padding: 16px;
+  transform: translateY(-52%);
+}
+
+.boardHead {
+  composes: mono;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+}
+
+.live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2f9e6a;
+  animation: blink 1.6s ease-in-out infinite;
+}
+
+.heatGrid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 14px;
+}
+
+.heatGrid i {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  background: color-mix(in oklab, #25233a calc(var(--v) * 100%), #ece8df);
+}
+
+.heatGrid i[data-hot] {
+  animation: blink 2.4s ease-in-out infinite;
+}
+
+.scale {
+  composes: mono;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.scale i {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ece8df, #25233a);
+}
+
+.legend {
+  composes: card;
+  position: absolute;
+  top: 34%;
+  right: 5%;
+  width: 34%;
+  padding: 12px 14px;
+  animation: float 5.5s var(--ease-in-out) infinite alternate;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
+  font-size: 11px;
+}
+
+.legend li i {
+  width: 34px;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in oklab, #25233a calc(var(--v) * 100%), #ece8df);
+}
+
+/* --------------------------------------------------------------- closet */
+
+.phone {
+  position: absolute;
+  top: 7%;
+  bottom: -8%;
+  left: 12%;
+  width: 46%;
+  padding: 9px;
+  border-radius: 36px;
+  background: #1d1c2c;
+  box-shadow: 0 34px 60px -30px rgb(29 28 44 / 0.65);
+}
+
+.screen {
+  position: relative;
+  height: 100%;
+  padding: 24px 14px 14px;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #f7f5f0;
+}
+
+.appBar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.appBar b {
+  font-size: 16px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.appBar span {
+  font-size: 7px;
+}
+
+.tabs {
+  display: flex;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.tabs span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #ebe8e1;
+  font-size: 9.5px;
+}
+
+.tabs span[data-on] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.pieces {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.piece {
+  display: grid;
+  justify-items: center;
+  padding: 10px 6px 8px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(29 28 44 / 0.06);
+}
+
+.piece svg {
+  width: 64%;
+  height: auto;
+  stroke: rgb(29 28 44 / 0.28);
+  stroke-width: 0.8;
+}
+
+.piece span {
+  margin-top: 4px;
+  font-size: 8.5px;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+
+.seam {
+  fill: none;
+  stroke: rgb(29 28 44 / 0.35);
+}
+
+.handle {
+  fill: none;
+  stroke: #8a6d4d;
+  stroke-width: 2;
+}
+
+.styleMe {
+  display: block;
+  margin-top: 12px;
+  padding: 9px;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 10px;
+  text-align: center;
+  color: #fff;
+}
+
+.look {
+  composes: card;
+  position: absolute;
+  top: 22%;
+  right: 7%;
+  width: 32%;
+  padding: 14px;
+  border-radius: 16px;
+  animation: float 5s var(--ease-in-out) infinite alternate;
+}
+
+.swatches {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.swatches i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(29 28 44 / 0.12);
+}
+
+.look b {
+  display: block;
+  margin-top: 12px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+}
+
+.look small {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.look span {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------- narrow containers */
+
+@container (max-width: 460px) {
+  .paper {
+    top: 8%;
+    bottom: 16%;
+    left: 6%;
+    width: 58%;
+    padding: 14px;
+  }
+
+  .paperHead span + span,
+  .caption {
+    display: none;
+  }
+
+  .callout {
+    right: 4%;
+    width: 42%;
+    padding: 9px 10px 9px 11px;
+    font-size: 9.5px;
+  }
+
+  .gauge {
+    right: 7%;
+    bottom: 7%;
+    width: 78px;
+    height: 78px;
+  }
+
+  .gauge span {
+    font-size: 19px;
+  }
+
+  .board {
+    top: 7%;
+    left: 6%;
+    right: 6%;
+    padding: 12px;
+    transform: none;
+  }
+
+  .legend {
+    top: auto;
+    right: 5%;
+    bottom: 5%;
+    width: 48%;
+  }
+
+  .phone {
+    left: 7%;
+    width: 56%;
+  }
+
+  .look {
+    right: 4%;
+    width: 38%;
+    padding: 11px;
+  }
+
+  .look b {
+    font-size: 24px;
+  }
+}
+
+@keyframes float {
+  from {
+    transform: translateY(-5px);
+  }
+  to {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.45;
+  }
+}

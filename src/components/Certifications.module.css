@@ -1,0 +1,131 @@
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(40px, 6vw, 120px);
+  align-items: start;
+}
+
+.side {
+  position: sticky;
+  top: 120px;
+}
+
+.side :global(.display) {
+  font-size: clamp(52px, 6.4vw, 104px);
+}
+
+.intro {
+  max-width: 21em;
+  margin-top: 26px;
+  font-size: 15px;
+  color: var(--ink-3);
+}
+
+.list {
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  cursor: default;
+}
+
+a.row {
+  cursor: pointer;
+}
+
+/* dark fill that wipes in from the left and out to the right */
+.row::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.row:hover::before,
+.row:focus-visible::before {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.4s ease;
+}
+
+.title {
+  display: block;
+  font-size: clamp(17px, 1.45vw, 21px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  transition: color 0.4s ease;
+}
+
+.issuer {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color 0.4s ease;
+}
+
+.arrow {
+  width: 18px;
+  height: 18px;
+  color: var(--on-accent);
+  opacity: 0;
+  transform: translate(-6px, 6px);
+  transition:
+    opacity 0.35s ease,
+    transform 0.5s var(--ease-out);
+}
+
+.row:hover .title,
+.row:focus-visible .title {
+  color: var(--on-accent);
+}
+
+.row:hover .num,
+.row:hover .issuer,
+.row:focus-visible .num,
+.row:focus-visible .issuer {
+  color: rgb(246 245 241 / 0.62);
+}
+
+.row:hover .arrow,
+.row:focus-visible .arrow {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: relative;
+    top: 0;
+  }
+
+  .row {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    padding: 18px 12px;
+  }
+}
