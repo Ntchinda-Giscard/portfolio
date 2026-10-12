@@ -18,12 +18,12 @@
   --tile-ink: #25233a;
 }
 
-.skills [data-family="tools"] {
+.skills [data-family="devops"] {
   --tile-bg: #dcd6cc;
   --tile-ink: #25233a;
 }
 
-.skills [data-family="core"] {
+.skills [data-family="ai"] {
   --tile-bg: transparent;
   --tile-ink: #25233a;
 }
@@ -149,12 +149,12 @@
   box-shadow: 0 20px 32px -18px rgb(29 28 44 / 0.6);
 }
 
-.tile[data-family="core"] {
+.tile[data-family="ai"] {
   box-shadow: none;
 }
 
-.tile[data-family="core"]:hover,
-.tile[data-family="core"]:focus-visible {
+.tile[data-family="ai"]:hover,
+.tile[data-family="ai"]:focus-visible {
   background: var(--bg-sunk);
   box-shadow: none;
 }
@@ -258,7 +258,7 @@
   letter-spacing: -0.04em;
 }
 
-.bigSym[data-family="core"] {
+.bigSym[data-family="ai"] {
   background: var(--bg-sunk);
 }
 

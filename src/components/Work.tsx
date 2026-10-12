@@ -107,9 +107,13 @@ export default function Work() {
                       ))}
                       {project.moreTech > 0 && <li className={styles.more}>+{project.moreTech}</li>}
                     </ul>
-                    <a className={cx("btn btn-dark", styles.cta)} href={project.link} target="_blank" rel="noreferrer">
-                      View on GitHub <ArrowUpRight className="arrow-ne" />
-                    </a>
+                    {project.link ? (
+                      <a className={cx("btn btn-dark", styles.cta)} href={project.link.href} target="_blank" rel="noreferrer">
+                        {project.link.label} <ArrowUpRight className="arrow-ne" />
+                      </a>
+                    ) : (
+                      project.note && <p className={styles.note}>{project.note}</p>
+                    )}
                   </div>
                   <div className={styles.visual}>
                     <ProjectVisual kind={project.visual} />

@@ -14,7 +14,7 @@ const serif = Instrument_Serif({
 });
 
 const title = `${profile.fullName} — ${profile.role.join(" ")}`;
-const description = `${profile.fullName} is a ${profile.role.join(" ").toLowerCase()}. ${profile.tagline}.`;
+const description = profile.description;
 
 export const metadata: Metadata = {
   title,
