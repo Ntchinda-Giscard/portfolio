@@ -91,8 +91,8 @@ export const about = {
     "Je conçois et développe des logiciels sur lesquels une entreprise peut compter : le produit qu’on utilise, les intégrations qui le relient au reste du système, et l’infrastructure qui le garde sûr et disponible.",
   ),
   sub: t(
-    "3+ years across finance, public-sector platforms and ERP integration — Python and FastAPI, React and Next.js, Kubernetes, and applied AI from NLP to LLM-written documents.",
-    "Plus de 3 ans entre finance, plateformes du secteur public et intégration d’ERP — Python et FastAPI, React et Next.js, Kubernetes, et IA appliquée, du NLP aux documents rédigés par LLM.",
+    "3+ years across payments, public-sector platforms and ERP integration — Python and FastAPI, React and Next.js, AWS and Kubernetes, and applied AI from NLP to LLM-written documents.",
+    "Plus de 3 ans entre paiements, plateformes du secteur public et intégration d’ERP — Python et FastAPI, React et Next.js, AWS et Kubernetes, et IA appliquée, du NLP aux documents rédigés par LLM.",
   ),
   resume: t("Résumé", "CV"),
   factsLabel: t("Quick facts", "En bref"),
@@ -384,7 +384,7 @@ type TimelineEntry = {
   metric?: { label: Tr; value: string };
   badge?: Tr;
   points?: Tr[];
-  tags?: string[];
+  tags?: (string | Tr)[];
 };
 
 const timeline: TimelineEntry[] = [
@@ -412,6 +412,28 @@ const timeline: TimelineEntry[] = [
     range: "2023",
     title: t("Master’s degree", "Master"),
     place: t("Mechatronics & Intelligent Systems", "Mécatronique & systèmes intelligents"),
+  },
+  {
+    year: "2023",
+    kind: "experience",
+    range: "2023 — 2024",
+    title: t("Full Stack Developer", "Développeur Full Stack"),
+    place: "Urgent 2K · Douala",
+    points: [
+      t(
+        "Built and maintained critical payment systems for financial clients, covered by unit tests",
+        "Développement et maintenance de systèmes de paiement critiques pour des clients financiers, couverts par des tests unitaires",
+      ),
+      t(
+        "Ran the production stack on AWS (EC2, RDS, S3) and administered PostgreSQL: query tuning, backups and restores",
+        "Exploitation de l’infrastructure de production sur AWS (EC2, RDS, S3) et administration de PostgreSQL : optimisation des requêtes, sauvegardes et restaurations",
+      ),
+      t(
+        "Automated batch jobs with Cron and Python, and set up GitLab CI/CD pipelines",
+        "Automatisation des traitements par lots (Cron, Python) et mise en place des pipelines CI/CD GitLab",
+      ),
+    ],
+    tags: ["AWS", "PostgreSQL", "Python", "GitLab CI", t("Unit tests", "Tests unitaires")],
   },
   {
     year: "2024",
@@ -461,8 +483,8 @@ const timeline: TimelineEntry[] = [
     year: "2026",
     kind: "projects",
     range: t("May 2026 — Present", "Mai 2026 — aujourd’hui"),
-    title: t("KamJob — founder & engineer", "KamJob — fondateur & ingénieur"),
-    place: t("My own product · kamjob.com", "Mon propre produit · kamjob.com"),
+    title: t("KamJob — co-founder & engineer", "KamJob — cofondateur & ingénieur"),
+    place: t("Co-founded product · kamjob.com", "Produit cofondé · kamjob.com"),
     points: [
       t(
         "Designed and built a swipe-to-apply job platform: mobile app, employer dashboard and API",
@@ -473,8 +495,8 @@ const timeline: TimelineEntry[] = [
         "Abonnements Mobile Money et CV adaptés par l’IA, envoyés directement aux recruteurs",
       ),
       t(
-        "Five security scanners and 300+ tests gate every deploy",
-        "Cinq analyses de sécurité et plus de 300 tests conditionnent chaque déploiement",
+        "OWASP Top 10 by design; SAST, SCA, secret and container scans plus 300+ tests gate every deploy",
+        "OWASP Top 10 dès la conception ; SAST, SCA, détection de secrets, analyse des conteneurs et plus de 300 tests conditionnent chaque déploiement",
       ),
     ],
     tags: ["FastAPI", "Expo", "Next.js", "PostgreSQL", "Claude API"],
