@@ -70,12 +70,18 @@ const serviceItems: Service[] = [
     promise: t("Ship faster without leaving the door open.", "Livrer plus vite, sans laisser la porte ouverte."),
     deliverables: [
       t(
-        "Security review with fixes: login, permissions, payments, uploads",
-        "Audit de sécurité avec correctifs : connexion, droits, paiements, fichiers",
+        "Security review against the OWASP Top 10, with the fixes",
+        "Audit de sécurité selon l’OWASP Top 10, correctifs compris",
       ),
-      t("CI gates that block leaked secrets and vulnerable code", "Une CI qui bloque les secrets exposés et le code vulnérable"),
-      t("Docker, Kubernetes and GitOps — every release reversible", "Docker, Kubernetes et GitOps — chaque mise en production réversible"),
-      t("Monitoring that warns you before your users do", "Une supervision qui vous alerte avant vos utilisateurs"),
+      t(
+        "CI gates: SAST, SCA, secret and container scanning",
+        "Une CI qui bloque : SAST, SCA, détection de secrets, analyse des conteneurs",
+      ),
+      t("Unit tests that replay real attacks, on every push", "Des tests unitaires qui rejouent de vraies attaques, à chaque push"),
+      t(
+        "AWS, Docker and Kubernetes — monitored, every release reversible",
+        "AWS, Docker et Kubernetes — supervisés, chaque mise en production réversible",
+      ),
     ],
     proof: [{ label: t("KamJob’s security", "La sécurité de KamJob"), href: "#security" }],
   },
@@ -198,8 +204,8 @@ export const approach = {
     {
       title: t("Prove & ship", "Prouver & livrer"),
       text: t(
-        "Tests that attack the code, security gates in CI, monitoring in production. Every release reproducible — and reversible.",
-        "Des tests qui attaquent le code, des contrôles de sécurité en CI, une supervision en production. Chaque mise en production reproductible — et réversible.",
+        "Unit tests that attack the code, SAST and SCA gates in CI, monitoring in production. Every release reproducible — and reversible.",
+        "Des tests unitaires qui attaquent le code, des contrôles SAST et SCA en CI, une supervision en production. Chaque mise en production reproductible — et réversible.",
       ),
     },
   ],
