@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import AppDemo from "@/components/case/AppDemo";
 import CaseHeader from "@/components/case/CaseHeader";
 import { CaseBlock, CaseHero, CaseOutcome } from "@/components/case/CaseParts";
@@ -6,51 +7,65 @@ import FormulaPlayground from "@/components/case/FormulaPlayground";
 import InView from "@/components/case/InView";
 import { BalancedPiece, DesktopStack, ManualWork, Pipeline, Reconcile } from "@/components/case/LedgerVisuals";
 import PageEffects from "@/components/PageEffects";
-import { ledgersyncCase as study } from "@/content/case-studies";
+import { getCaseStudy, getCaseUi } from "@/content/case-studies";
 import { profile } from "@/content/portfolio";
+import { alternates, fill, isLocale } from "@/lib/i18n";
 
-export const metadata: Metadata = {
-  title: `${study.title} — case study · ${profile.fullName}`,
-  description: study.summary,
-};
+export async function generateMetadata({ params }: PageProps<"/[lang]/projects/ledgersync">): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) return {};
+  const study = getCaseStudy("ledgersync", lang);
+  const title = fill(getCaseUi(lang).metaTitle, { title: study.title, name: profile.fullName });
+  return {
+    title,
+    description: study.summary,
+    alternates: alternates(lang, "/projects/ledgersync"),
+    openGraph: { title, description: study.summary, type: "article" },
+  };
+}
 
-export default function LedgerSyncPage() {
+export default async function LedgerSyncPage({ params }: PageProps<"/[lang]/projects/ledgersync">) {
+  const { lang } = await params;
+  if (!isLocale(lang)) notFound();
+  const study = getCaseStudy("ledgersync", lang);
+  const ui = getCaseUi(lang);
   const { sections } = study;
+
   return (
     <>
       <PageEffects />
-      <CaseHeader next={study.next} />
+      <CaseHeader lang={lang} name={profile.fullName} initials={profile.initials} ui={ui} next={study.next} />
       <main>
-        <CaseHero study={study} visual={<AppDemo />} />
+        <CaseHero study={study} ui={ui} visual={<AppDemo lang={lang} />} />
         <CaseBlock section={sections.problem}>
           <InView>
-            <ManualWork />
+            <ManualWork lang={lang} />
           </InView>
         </CaseBlock>
         <CaseBlock section={sections.pipeline}>
           <InView>
-            <Pipeline />
+            <Pipeline lang={lang} />
           </InView>
         </CaseBlock>
         <CaseBlock section={sections.formulas}>
-          <FormulaPlayground />
+          <FormulaPlayground lang={lang} />
         </CaseBlock>
         <CaseBlock section={sections.balance}>
           <InView>
-            <BalancedPiece />
+            <BalancedPiece lang={lang} />
           </InView>
         </CaseBlock>
         <CaseBlock section={sections.reconcile}>
           <InView>
-            <Reconcile />
+            <Reconcile lang={lang} />
           </InView>
         </CaseBlock>
         <CaseBlock section={sections.desktop}>
           <InView>
-            <DesktopStack />
+            <DesktopStack lang={lang} />
           </InView>
         </CaseBlock>
-        <CaseOutcome study={study} />
+        <CaseOutcome study={study} ui={ui} name={profile.fullName} />
       </main>
     </>
   );

@@ -1,0 +1,340 @@
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.intro {
+  max-width: 24em;
+  padding-bottom: 12px;
+  text-wrap: pretty;
+  font-size: 14px;
+  text-align: right;
+  color: var(--ink-3);
+}
+
+/* ---------------------------------------------------------------- steps */
+
+.steps {
+  --gap: clamp(20px, 2.6vw, 40px);
+  --node: 44px;
+  position: relative;
+  margin-top: clamp(56px, 7vw, 88px);
+}
+
+/* from the first node's centre to the last one's */
+.rail {
+  position: absolute;
+  top: calc(var(--node) / 2);
+  left: calc(var(--node) / 2);
+  right: calc((100% - 3 * var(--gap)) / 4 - var(--node) / 2);
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left;
+}
+
+.stepList {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--node);
+  height: var(--node);
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  transition:
+    background-color 0.5s var(--ease-out),
+    border-color 0.5s var(--ease-out),
+    color 0.5s var(--ease-out),
+    box-shadow 0.5s var(--ease-out);
+}
+
+.step[data-on] .node {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow:
+    0 0 0 6px var(--bg),
+    0 12px 24px -10px rgb(40 38 63 / 0.7);
+}
+
+.stepTitle {
+  margin-top: 26px;
+  font-size: clamp(22px, 1.9vw, 28px);
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.stepText {
+  max-width: 24em;
+  margin-top: 10px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  text-wrap: pretty;
+  color: var(--ink-3);
+}
+
+.loop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: clamp(40px, 5vw, 60px);
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 2.1vw, 32px);
+  font-style: italic;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
+}
+
+.loop svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--muted);
+}
+
+/* ----------------------------------------------------------- principles */
+
+.principles {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(40px, 6vw, 120px);
+  align-items: start;
+  margin-top: clamp(88px, 11vw, 150px);
+}
+
+.side {
+  position: sticky;
+  top: 120px;
+}
+
+.label {
+  margin-bottom: 18px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sideTitle {
+  font-size: clamp(36px, 3.8vw, 60px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+.sideTitle em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink-3);
+}
+
+.sideIntro {
+  max-width: 22em;
+  margin-top: 20px;
+  font-size: 15px;
+  color: var(--ink-3);
+}
+
+.list {
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+/* the same dark wipe as the certification rows */
+.row::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.row:hover::before,
+.row:focus-visible::before {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.num {
+  padding-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.4s ease;
+}
+
+.name {
+  display: block;
+  font-size: clamp(17px, 1.45vw, 21px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  transition: color 0.4s ease;
+}
+
+.text {
+  display: block;
+  max-width: 38em;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-3);
+  transition: color 0.4s ease;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--bg-sunk);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-2);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+.tag svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.row:hover .name,
+.row:focus-visible .name {
+  color: var(--on-accent);
+}
+
+.row:hover .num,
+.row:hover .text,
+.row:focus-visible .num,
+.row:focus-visible .text {
+  color: rgb(246 245 241 / 0.68);
+}
+
+.row:hover .tag,
+.row:focus-visible .tag {
+  background: rgb(255 255 255 / 0.12);
+  color: var(--on-accent);
+}
+
+a.row:hover .tag svg {
+  transform: translateX(3px);
+}
+
+/* ---------------------------------------------------------- small screens */
+
+@media (max-width: 900px) {
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .intro {
+    text-align: left;
+  }
+
+  /* the rail turns vertical, down the left edge */
+  .rail {
+    top: calc(var(--node) / 2);
+    bottom: 0;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+
+  .fill {
+    transform: scaleY(var(--progress, 0));
+    transform-origin: top;
+  }
+
+  .stepList {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: var(--node) minmax(0, 1fr);
+    column-gap: 20px;
+  }
+
+  .node {
+    grid-row: 1 / span 2;
+  }
+
+  .stepTitle {
+    margin-top: 9px;
+  }
+
+  .principles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: relative;
+    top: 0;
+  }
+
+  .row {
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 18px 12px;
+  }
+
+  .tag {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

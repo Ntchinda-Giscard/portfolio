@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { achievements } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
 import { useMediaQuery, useScrollFrame } from "@/lib/hooks";
 import { clamp, cx, pad } from "@/lib/utils";
 import { ArrowRight, Eyebrow, Flag, Flow, Scale, Shield, Spark, Trophy } from "./ui";
@@ -9,8 +9,11 @@ import styles from "./Achievements.module.css";
 
 const ICONS = { trophy: Trophy, flag: Flag, shield: Shield, spark: Spark, scale: Scale, flow: Flow };
 
+type Props = { num: string; content: Content["achievements"] };
+
 /** Vertical scroll drives a horizontal card track while the section is pinned. */
-export default function Achievements() {
+export default function Achievements({ num, content }: Props) {
+  const achievements = content.items;
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
@@ -56,9 +59,9 @@ export default function Achievements() {
       <div className={styles.sticky}>
         <div className={cx("container", styles.head)}>
           <div>
-            <Eyebrow num="06" label="Achievements" />
+            <Eyebrow num={num} label={content.eyebrow} />
             <h2 className="display" data-reveal>
-              Proud <em>moments.</em>
+              {content.title} <em>{content.em}</em>
             </h2>
           </div>
           <span className={styles.progress} aria-hidden="true">
@@ -99,8 +102,8 @@ export default function Achievements() {
               );
             })}
             <li className={styles.end}>
-              <span>and counting</span>
-              <a href="#contact" aria-label="Get in touch">
+              <span>{content.more}</span>
+              <a href="#contact" aria-label={content.getInTouch}>
                 <ArrowRight />
               </a>
             </li>

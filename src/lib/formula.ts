@@ -4,6 +4,21 @@
  * and si(condition ; then ; else) as the conditional — only the branch taken runs.
  */
 
+import type { Locale } from "./i18n";
+
+/** A mistake in the formula, explained in both languages the playground speaks. */
+class FormulaError extends Error {
+  constructor(
+    message: string,
+    readonly fr: string,
+  ) {
+    super(message);
+  }
+}
+
+/** « x » — French quotes keep their non-breaking spaces. */
+const q = (s: string) => `« ${s} »`;
+
 export type Op = "+" | "−" | "×" | "÷" | "=" | "≠" | ">" | "<" | "≥" | "≤";
 type Fn = "si" | "abs" | "sqrt";
 
@@ -89,7 +104,7 @@ export function tokenize(src: string): Token[] {
       continue;
     }
     const op = OPERATORS.find(([spelling]) => src.startsWith(spelling, i));
-    if (!op) throw new Error(`Unexpected character “${ch}”`);
+    if (!op) throw new FormulaError(`Unexpected character “${ch}”`, `Caractère inattendu ${q(ch)}`);
     tokens.push({ type: "operator", value: op[1], text: op[0] });
     i += op[0].length;
   }
@@ -105,12 +120,12 @@ function parse(tokens: Token[]): Node {
   };
   const expect = (value: "(" | ")") => {
     const t = tokens[pos++];
-    if (t?.type !== "paren" || t.value !== value) throw new Error(`Expected “${value}”`);
+    if (t?.type !== "paren" || t.value !== value) throw new FormulaError(`Expected “${value}”`, `${q(value)} attendu`);
   };
 
   const primary = (): Node => {
     const t = tokens[pos++];
-    if (!t) throw new Error("The formula ends too early");
+    if (!t) throw new FormulaError("The formula ends too early", "La formule s’arrête trop tôt");
     if (t.type === "number") return { k: "num", v: t.value };
     if (t.type === "variable") return { k: "var", name: t.value };
     if (t.type === "paren" && t.value === "(") {
@@ -127,11 +142,13 @@ function parse(tokens: Token[]): Node {
       }
       expect(")");
       if (args.length !== FUNCTIONS[t.value]) {
-        throw new Error(`${t.value}() takes ${FUNCTIONS[t.value]} argument${FUNCTIONS[t.value] > 1 ? "s" : ""}`);
+        const n = FUNCTIONS[t.value];
+        const plural = n > 1 ? "s" : "";
+        throw new FormulaError(`${t.value}() takes ${n} argument${plural}`, `${t.value}() attend ${n} argument${plural}`);
       }
       return { k: "call", fn: t.value, args };
     }
-    throw new Error(`Unexpected “${t.text}”`);
+    throw new FormulaError(`Unexpected “${t.text}”`, `${q(t.text)} inattendu`);
   };
 
   const unary = (): Node => {
@@ -174,7 +191,7 @@ function parse(tokens: Token[]): Node {
   }
 
   const ast = comparison();
-  if (pos < tokens.length) throw new Error(`Unexpected “${tokens[pos].text}”`);
+  if (pos < tokens.length) throw new FormulaError(`Unexpected “${tokens[pos].text}”`, `${q(tokens[pos].text)} inattendu`);
   return ast;
 }
 
@@ -185,7 +202,7 @@ function evaluate(node: Node, vars: Record<string, number>, branches: boolean[])
       return node.v;
     case "var": {
       const key = Object.keys(vars).find((k) => k.toLowerCase() === node.name.toLowerCase());
-      if (key === undefined) throw new Error(`Unknown variable “${node.name}”`);
+      if (key === undefined) throw new FormulaError(`Unknown variable “${node.name}”`, `Variable inconnue ${q(node.name)}`);
       return vars[key];
     }
     case "neg":
@@ -198,7 +215,7 @@ function evaluate(node: Node, vars: Record<string, number>, branches: boolean[])
       }
       const x = evaluate(node.args[0], vars, branches);
       if (node.fn === "abs") return Math.abs(x);
-      if (x < 0) throw new Error("sqrt() of a negative number");
+      if (x < 0) throw new FormulaError("sqrt() of a negative number", "sqrt() d’un nombre négatif");
       return Math.sqrt(x);
     }
     case "bin": {
@@ -212,7 +229,7 @@ function evaluate(node: Node, vars: Record<string, number>, branches: boolean[])
         case "×":
           return a * b;
         case "÷":
-          if (b === 0) throw new Error("Division by zero");
+          if (b === 0) throw new FormulaError("Division by zero", "Division par zéro");
           return a / b;
         case "=":
           return Number(a === b);
@@ -233,14 +250,16 @@ function evaluate(node: Node, vars: Record<string, number>, branches: boolean[])
 
 export type FormulaResult = { tokens: Token[]; branches: boolean[]; value?: number; error?: string };
 
-export function runFormula(src: string, vars: Record<string, number>): FormulaResult {
+export function runFormula(src: string, vars: Record<string, number>, lang: Locale = "en"): FormulaResult {
   let tokens: Token[] = [];
   const branches: boolean[] = [];
   try {
     tokens = tokenize(src);
-    if (tokens.length === 0) return { tokens, branches, error: "Type a formula" };
+    if (tokens.length === 0) return { tokens, branches, error: lang === "fr" ? "Saisissez une formule" : "Type a formula" };
     return { tokens, branches, value: evaluate(parse(tokens), vars, branches) };
   } catch (error) {
-    return { tokens, branches, error: error instanceof Error ? error.message : String(error) };
+    const message =
+      error instanceof FormulaError && lang === "fr" ? error.fr : error instanceof Error ? error.message : String(error);
+    return { tokens, branches, error: message };
   }
 }

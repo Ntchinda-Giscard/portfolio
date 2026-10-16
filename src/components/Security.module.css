@@ -1,0 +1,617 @@
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  align-items: end;
+  gap: clamp(28px, 5vw, 80px);
+}
+
+.headSide {
+  padding-bottom: 12px;
+}
+
+.context {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 7px 14px 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.55);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.context svg {
+  width: 14px;
+  height: 14px;
+  color: #1f7a4c;
+}
+
+.intro {
+  max-width: 34em;
+  font-size: 15px;
+  line-height: 1.6;
+  text-wrap: pretty;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------------- explorer */
+
+.explorer {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: clamp(20px, 3vw, 44px);
+  align-items: stretch;
+  margin-top: clamp(48px, 6vw, 72px);
+}
+
+.tabs {
+  border-top: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 26px 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  color: var(--ink);
+}
+
+/* the selected layer gets the same dark wipe as the certification rows */
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.55s var(--ease-out);
+}
+
+.tab[aria-selected="true"]::before {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.tabNum {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.4s ease;
+}
+
+.tabIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(29 28 44 / 0.06),
+    0 8px 16px -10px rgb(29 28 44 / 0.35);
+  color: var(--ink);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.tabIcon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.tabTitle {
+  font-size: clamp(16px, 1.3vw, 19px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  transition: color 0.4s ease;
+}
+
+.tabTag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted);
+  transition: color 0.4s ease;
+}
+
+.tab[aria-selected="true"] .tabTitle {
+  color: var(--on-accent);
+}
+
+.tab[aria-selected="true"] .tabNum,
+.tab[aria-selected="true"] .tabTag {
+  color: rgb(246 245 241 / 0.62);
+}
+
+.tab[aria-selected="true"] .tabIcon {
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: none;
+  color: var(--on-accent);
+}
+
+/* --------------------------------------------------------------- panes */
+
+/* All panes share one grid cell, so the card is as tall as the longest. */
+.panes {
+  display: grid;
+  padding: clamp(26px, 3vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-card);
+}
+
+.pane {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, 10px, 0);
+  transition:
+    opacity 0.3s var(--ease-out),
+    transform 0.5s var(--ease-out),
+    visibility 0s 0.3s;
+}
+
+.pane[data-active] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.45s var(--ease-out) 0.05s,
+    transform 0.6s var(--ease-out),
+    visibility 0s;
+}
+
+.paneTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.paneIcon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(29 28 44 / 0.06),
+    0 14px 28px -16px rgb(29 28 44 / 0.35);
+  color: var(--ink);
+}
+
+.paneIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.paneCount {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.paneTitle {
+  margin-top: 22px;
+  font-size: clamp(28px, 2.6vw, 40px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.tags li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-sunk);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+.facts {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.fact {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fact:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.fact dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fact dt svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.fact[data-kind="threat"] dt svg {
+  color: #b23a2e;
+}
+
+.fact[data-kind="defense"] dt svg {
+  color: var(--accent);
+}
+
+.fact[data-kind="proof"] dt svg {
+  color: #1f7a4c;
+}
+
+.fact dd {
+  margin-top: 8px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  text-wrap: pretty;
+  color: var(--ink-2);
+}
+
+/* ---------------------------------------------------------- deploy gate */
+
+.gate {
+  margin-top: clamp(20px, 2.4vw, 28px);
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(160deg, #f1eee7, #e5e0d4);
+}
+
+.gateHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 24px;
+}
+
+.gateTitle {
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.gateNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.gateNote svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: #b23a2e;
+}
+
+/* A light pulse runs from push to deploy; each check lights as it passes. */
+.line {
+  --dot: 40px;
+  --cycle: 6.4s;
+  position: relative;
+  margin-top: 30px;
+}
+
+.track {
+  position: absolute;
+  top: calc(var(--dot) / 2 - 1px);
+  left: calc(100% / var(--n) / 2);
+  right: calc(100% / var(--n) / 2);
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(29 28 44 / 0.12);
+}
+
+.runner {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 18%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: run var(--cycle) linear infinite;
+}
+
+@keyframes run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(560%);
+  }
+}
+
+/* Without motion, a frozen pulse would read as part of the track. */
+@media (prefers-reduced-motion: reduce) {
+  .runner {
+    display: none;
+  }
+}
+
+@keyframes run-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(560%);
+  }
+}
+
+.stations {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+}
+
+.station {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.stationDot {
+  display: grid;
+  place-items: center;
+  width: var(--dot);
+  height: var(--dot);
+  margin-bottom: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 8px 18px -12px rgb(29 28 44 / 0.45);
+  color: #1f7a4c;
+  /* timed so the pulse's centre crosses this station as it lights */
+  animation: hit var(--cycle) linear infinite;
+  animation-delay: calc(var(--cycle) * (var(--i) / (var(--n) - 1) + 0.09) / 1.18);
+}
+
+.stationDot svg {
+  width: 16px;
+  height: 16px;
+}
+
+.stationDot i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--on-accent);
+}
+
+.station[data-edge] .stationDot {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+@keyframes hit {
+  0%,
+  14%,
+  100% {
+    transform: none;
+  }
+  5% {
+    transform: scale(1.14);
+    box-shadow: 0 0 0 6px rgb(31 122 76 / 0.14);
+  }
+}
+
+.station b {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.station small {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+
+/* ---------------------------------------------------------------- stats */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: clamp(40px, 5vw, 64px);
+  border-top: 1px solid var(--line);
+}
+
+.stat {
+  padding: 26px 24px 0 0;
+}
+
+.stat + .stat {
+  padding-left: 24px;
+  border-left: 1px solid var(--line);
+}
+
+.statValue {
+  display: flex;
+  align-items: baseline;
+  font-size: clamp(48px, 5.4vw, 88px);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  color: var(--ink);
+}
+
+.statValue small {
+  margin-left: 0.08em;
+  font-size: 0.4em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--muted);
+}
+
+.statLabel {
+  max-width: 18em;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------- small screens */
+
+@media (max-width: 1100px) {
+  .tabTag {
+    display: none;
+  }
+
+  .tab {
+    grid-template-columns: 26px 34px minmax(0, 1fr);
+  }
+}
+
+/* Every layer as its own card; no tabs to pick from. */
+@media (max-width: 900px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .explorer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tabs {
+    display: none;
+  }
+
+  .panes {
+    gap: 14px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .pane {
+    grid-area: auto;
+    padding: 24px 22px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: var(--bg-elev);
+    box-shadow: var(--shadow-card);
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .stat:nth-child(n + 3) {
+    padding-top: 30px;
+  }
+}
+
+/* The gate runs top to bottom. */
+@media (max-width: 760px) {
+  .track {
+    top: calc(var(--dot) / 2);
+    bottom: calc(var(--dot) / 2);
+    left: calc(var(--dot) / 2 - 1px);
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .runner {
+    right: 0;
+    bottom: auto;
+    width: auto;
+    height: 18%;
+    background: linear-gradient(180deg, transparent, var(--accent), transparent);
+    animation-name: run-down;
+  }
+
+  .stations {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .station {
+    display: grid;
+    grid-template-columns: var(--dot) minmax(0, 1fr);
+    column-gap: 14px;
+    row-gap: 2px;
+    align-items: center;
+    padding: 0;
+    text-align: left;
+  }
+
+  .stationDot {
+    grid-row: 1 / span 2;
+    margin-bottom: 0;
+  }
+
+  .station b {
+    align-self: end;
+  }
+
+  .station small {
+    align-self: start;
+  }
+}

@@ -2,12 +2,19 @@
 
 import Image from "next/image";
 import { useRef, useState, type PointerEvent } from "react";
-import { about, profile } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
+import { fill } from "@/lib/i18n";
 import { Check, Rotate } from "./ui";
 import styles from "./IdCard.module.css";
 
+type Props = {
+  profile: Content["profile"];
+  card: Content["about"]["card"];
+  traits: Content["about"]["whatIAm"];
+};
+
 /** A lanyard ID badge: swings gently, tilts toward the pointer, flips on click. */
-export default function IdCard() {
+export default function IdCard({ profile, card, traits }: Props) {
   const [flipped, setFlipped] = useState(false);
   const tiltRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +35,7 @@ export default function IdCard() {
     tiltRef.current?.style.setProperty("--rx", "0deg");
   };
 
-  const strap = `${profile.fullName} ✦ Developer ✦ `.repeat(5);
+  const strap = `${profile.fullName} ✦ ${card.strap} ✦ `.repeat(5);
 
   return (
     <>
@@ -54,38 +61,38 @@ export default function IdCard() {
                   <span className={styles.slot} />
                   <span className={styles.mark}>{profile.initials}</span>
                   <span>
-                    <b>Developer ID</b>
-                    <small>{about.card.issued}</small>
+                    <b>{card.heading}</b>
+                    <small>{card.issued}</small>
                   </span>
                 </div>
                 <div className={styles.photo}>
-                  <Image src={profile.portrait} alt={`Portrait of ${profile.firstName}`} fill sizes="140px" />
+                  <Image src={profile.portrait} alt={fill(card.portraitAlt, { name: profile.firstName })} fill sizes="140px" />
                 </div>
                 <p className={styles.name}>{profile.fullName}</p>
                 <p className={styles.role}>{profile.role.join(" ")}</p>
                 <dl className={styles.fields}>
                   <div>
-                    <dt>ID No</dt>
-                    <dd>{about.card.id}</dd>
+                    <dt>{card.idLabel}</dt>
+                    <dd>{card.id}</dd>
                   </div>
                   <div>
-                    <dt>Dept</dt>
-                    <dd>{about.card.dept}</dd>
+                    <dt>{card.deptLabel}</dt>
+                    <dd>{card.dept}</dd>
                   </div>
                   <div>
-                    <dt>Valid till</dt>
-                    <dd>{about.card.validTill}</dd>
+                    <dt>{card.validLabel}</dt>
+                    <dd>{card.validTill}</dd>
                   </div>
                 </dl>
-                <Barcode value={about.card.id} />
+                <Barcode value={card.id} />
                 <span className={styles.holo} />
                 <span className={styles.glare} />
               </div>
 
               <div className={`${styles.face} ${styles.back}`} aria-hidden={!flipped}>
-                <p className={styles.backTitle}>What I am</p>
+                <p className={styles.backTitle}>{card.backTitle}</p>
                 <ul className={styles.traits}>
-                  {about.whatIAm.map((trait) => (
+                  {traits.map((trait) => (
                     <li key={trait.title}>
                       <span className={styles.tick}>
                         <Check />
@@ -98,7 +105,9 @@ export default function IdCard() {
                   ))}
                 </ul>
                 <p className={styles.signature}>{profile.firstName}</p>
-                <p className={styles.found}>If found, say hello · {profile.email}</p>
+                <p className={styles.found}>
+                  {card.found} · {profile.email}
+                </p>
                 <span className={styles.glare} />
               </div>
             </div>
@@ -107,7 +116,7 @@ export default function IdCard() {
       </div>
 
       <button type="button" className={styles.flip} onClick={() => setFlipped((v) => !v)} aria-pressed={flipped}>
-        <Rotate /> {flipped ? "Flip back" : "Flip the card"}
+        <Rotate /> {flipped ? card.flipBack : card.flip}
       </button>
     </>
   );

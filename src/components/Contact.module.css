@@ -36,10 +36,67 @@
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
-  align-items: end;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: start;
   gap: clamp(40px, 6vw, 96px);
   margin-top: clamp(56px, 8vw, 104px);
+}
+
+.call {
+  margin-top: 30px;
+}
+
+/* status · local time · reply time · languages · overlap */
+.panel {
+  margin-bottom: 26px;
+  padding: 2px 20px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgb(255 255 255 / 0.5);
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row dt {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.row dd {
+  text-align: right;
+  color: var(--ink-2);
+}
+
+.live {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: #2f9e6a;
+  animation: pulse 2.2s ease-out infinite;
+}
+
+.clock {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 
 .blurb {

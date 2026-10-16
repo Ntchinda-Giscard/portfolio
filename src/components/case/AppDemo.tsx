@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { localize, t, type Locale } from "@/lib/i18n";
 import { cx } from "@/lib/utils";
 import { Check } from "../ui";
 import s from "./ledgersync.module.css";
+
+/** The app on screen is French in both languages; only what describes it is translated. */
+const COPY = {
+  steps: t("Module M1 steps", "Étapes du module M1"),
+  soon: t("coming soon", "bientôt"),
+  edited: t("Edited by Accounting · applied on the next run", "Modifiée par la comptabilité · appliquée au traitement suivant"),
+};
 
 const STEPS = [
   "Chargement",
@@ -299,7 +307,8 @@ const SCENES = [
   { title: "Rapprochement", ms: 3800, Scene: MatchScene },
 ];
 
-export default function AppDemo() {
+export default function AppDemo({ lang }: { lang: Locale }) {
+  const copy = localize(COPY, lang);
   const rootRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState(0);
   const [running, setRunning] = useState(false);
@@ -387,7 +396,7 @@ export default function AppDemo() {
               <span className={s.period}>09/2025</span>
             </p>
 
-            <ol className={s.stepper} aria-label="Étapes du module M1">
+            <ol className={s.stepper} aria-label={copy.steps}>
               {STEPS.map((label, n) => {
                 const playable = n < SCENES.length;
                 return (
@@ -397,7 +406,7 @@ export default function AppDemo() {
                       className={s.stepBtn}
                       disabled={!playable}
                       aria-current={n === phase ? "step" : undefined}
-                      aria-label={playable ? `${n + 1}. ${label}` : `${n + 1}. ${label} (bientôt)`}
+                      aria-label={playable ? `${n + 1}. ${label}` : `${n + 1}. ${label} (${copy.soon})`}
                       onClick={() => setPhase(n)}
                     >
                       <span className={s.stepNum}>{n < phase ? <Check /> : n + 1}</span>
@@ -419,7 +428,7 @@ export default function AppDemo() {
         <span className={s.fx}>ƒx</span>
         <span>
           <b>TVA = Frais × 0,1925</b>
-          <small>Edited by Accounting · applied on the next run</small>
+          <small>{copy.edited}</small>
         </span>
       </div>
     </div>

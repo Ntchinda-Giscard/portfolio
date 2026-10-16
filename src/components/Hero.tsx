@@ -1,20 +1,27 @@
 import type { CSSProperties } from "react";
-import { profile } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
 import HeroStage from "./HeroStage";
 import { ArrowDown, ArrowRight } from "./ui";
 import styles from "./Hero.module.css";
 
-export default function Hero() {
+type Props = { profile: Content["profile"]; content: Content["hero"] };
+
+export default function Hero({ profile, content }: Props) {
   // Size the ghost name to span the stage edge to edge (a capital is ~0.59em wide in this font).
   const ghostSize = Math.min(34, 160 / profile.firstName.length);
 
   return (
-    <section id="top" className={styles.hero} aria-label="Introduction">
+    <section id="top" className={styles.hero} aria-label={content.label}>
       <p className={styles.ghost} aria-hidden="true" style={{ "--ghost": `${ghostSize}vw` } as CSSProperties}>
         {profile.firstName}
       </p>
 
-      <HeroStage video={profile.heroVideo} poster={profile.heroPoster} name={profile.firstName} />
+      <HeroStage
+        video={profile.heroVideo}
+        poster={profile.heroPoster}
+        name={profile.firstName}
+        labels={content.stage}
+      />
 
       <div className={styles.copy}>
         <h1 className={styles.title}>
@@ -34,14 +41,14 @@ export default function Hero() {
 
       <div className={styles.actions}>
         <a href="#work" className="btn btn-dark">
-          Explore work <ArrowRight className="arrow-r" />
+          {content.explore} <ArrowRight className="arrow-r" />
         </a>
         <div className={styles.secondary}>
           <a href="#contact" className="btn btn-ghost btn-sm">
-            Let&apos;s talk
+            {content.talk}
           </a>
           <a href={profile.resumeUrl} className="btn btn-ghost btn-sm" download>
-            Resume <ArrowDown className="arrow-d" />
+            {content.resume} <ArrowDown className="arrow-d" />
           </a>
         </div>
       </div>

@@ -1,15 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
-import { navItems, profile } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
+import { fill, type Locale } from "@/lib/i18n";
 import { useScrollFrame } from "@/lib/hooks";
 import { cx, getLenis, pad } from "@/lib/utils";
+import LangSwitch from "./LangSwitch";
 import styles from "./Header.module.css";
 
-/** Every section that can own the viewport; "certifications" has no nav item, so nothing lights up there. */
-const SECTION_IDS = ["about", "skills", "work", "certifications", "experience", "achievements", "contact"];
+/** Every section that can own the viewport, in page order; the ones without a nav item light nothing up. */
+const SECTION_IDS = [
+  "about",
+  "services",
+  "work",
+  "approach",
+  "security",
+  "skills",
+  "experience",
+  "certifications",
+  "achievements",
+  "contact",
+];
 
-export default function Header() {
+type Props = {
+  lang: Locale;
+  profile: Content["profile"];
+  content: Content["header"];
+};
+
+export default function Header({ lang, profile, content }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -75,42 +94,46 @@ export default function Header() {
 
   return (
     <header className={cx(styles.header, scrolled && styles.scrolled, open && styles.menuOpen)}>
-      <a href="#top" className={styles.brand} aria-label={`${profile.fullName}, back to top`}>
+      <a href="#top" className={styles.brand} aria-label={fill(content.home, { name: profile.fullName })}>
         <span className={styles.logo}>{profile.initials}</span>
         <span className={styles.name}>{profile.fullName}</span>
       </a>
 
-      <nav ref={navRef} className={styles.nav} aria-label="Primary">
-        <span ref={pillRef} className={styles.pill} aria-hidden="true" />
-        <ul className={styles.list}>
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                className={cx(styles.link, active === item.id && styles.active)}
-                aria-current={active === item.id ? "location" : undefined}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <div className={styles.end}>
+        <nav ref={navRef} className={styles.nav} aria-label={content.navLabel}>
+          <span ref={pillRef} className={styles.pill} aria-hidden="true" />
+          <ul className={styles.list}>
+            {content.nav.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  className={cx(styles.link, active === item.id && styles.active)}
+                  aria-current={active === item.id ? "location" : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      <button
-        type="button"
-        className={styles.menuButton}
-        aria-expanded={open}
-        aria-controls="site-menu"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-        <span className={styles.burger} aria-hidden="true" />
-      </button>
+        <LangSwitch lang={lang} label={content.language} />
+
+        <button
+          type="button"
+          className={styles.menuButton}
+          aria-expanded={open}
+          aria-controls="site-menu"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span className="sr-only">{open ? content.closeMenu : content.openMenu}</span>
+          <span className={styles.burger} aria-hidden="true" />
+        </button>
+      </div>
 
       <div id="site-menu" className={styles.sheet} data-open={open || undefined} inert={!open}>
         <ul>
-          {navItems.map((item, i) => (
+          {content.nav.map((item, i) => (
             <li key={item.id} style={{ "--i": i } as CSSProperties}>
               <a href={`#${item.id}`} onClick={(e) => goTo(e, item.id)}>
                 <span>{pad(i + 1)}</span>
@@ -120,7 +143,7 @@ export default function Header() {
           ))}
         </ul>
         <a className="btn btn-dark" href={`mailto:${profile.email}`}>
-          Say hello
+          {content.sayHello}
         </a>
       </div>
     </header>

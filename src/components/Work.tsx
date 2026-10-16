@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { projects, workIntro } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
+import { fill, type Locale } from "@/lib/i18n";
 import { useMediaQuery } from "@/lib/hooks";
 import { cx, pad } from "@/lib/utils";
 import ProjectVisual from "./ProjectVisual";
@@ -13,7 +14,10 @@ import styles from "./Work.module.css";
 const COLLAPSED = 92;
 const GAP = 14;
 
-export default function Work() {
+type Props = { num: string; lang: Locale; content: Content["work"] };
+
+export default function Work({ num, lang, content }: Props) {
+  const { projects } = content;
   const [active, setActive] = useState(0);
   const stacked = useMediaQuery("(max-width: 900px)");
   const trackRef = useRef<HTMLDivElement>(null);
@@ -31,20 +35,20 @@ export default function Work() {
     observer.observe(track);
     update();
     return () => observer.disconnect();
-  }, []);
+  }, [projects.length]);
 
   return (
     <section id="work" className={cx("section", styles.work)}>
       <div className="container">
         <div className={styles.head}>
           <div>
-            <Eyebrow num="03" label="Selected work" />
+            <Eyebrow num={num} label={content.eyebrow} />
             <h2 className="display" data-reveal>
-              Things I&apos;ve <em>built.</em>
+              {content.title} <em>{content.em}</em>
             </h2>
           </div>
           <p className={styles.intro} data-reveal>
-            {workIntro}
+            {content.intro}
           </p>
         </div>
 
@@ -70,7 +74,7 @@ export default function Work() {
                   onClick={() => setActive(i)}
                   aria-expanded={open}
                   aria-controls={`project-${i}`}
-                  aria-label={`Open ${project.title}`}
+                  aria-label={fill(content.open, { title: project.title })}
                   tabIndex={open ? -1 : 0}
                 >
                   <span className={styles.tabNum}>{pad(i + 1)}</span>
@@ -94,7 +98,7 @@ export default function Work() {
                         <li key={feature}>{feature}</li>
                       ))}
                     </ul>
-                    <ul className={styles.tech} aria-label="Built with">
+                    <ul className={styles.tech} aria-label={content.builtWith}>
                       {project.tech.map((tech) => (
                         <li key={tech.name}>
                           {tech.logo ? (
@@ -126,7 +130,7 @@ export default function Work() {
                     )}
                   </div>
                   <div className={styles.visual}>
-                    <ProjectVisual kind={project.visual} />
+                    <ProjectVisual kind={project.visual} lang={lang} />
                   </div>
                 </div>
               </article>

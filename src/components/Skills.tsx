@@ -1,31 +1,31 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { elements, families, type FamilyId } from "@/content/portfolio";
+import type { Content, FamilyId } from "@/content/portfolio";
 import { cx, pad } from "@/lib/utils";
 import { Cursor, Eyebrow } from "./ui";
 import styles from "./Skills.module.css";
 
-const familyLabel = Object.fromEntries(families.map((f) => [f.id, f.label])) as Record<FamilyId, string>;
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+type Props = { num: string; content: Content["skills"] };
 
-export default function Skills() {
+export default function Skills({ num, content }: Props) {
+  const { families, elements } = content;
+  const familyLabel = Object.fromEntries(families.map((f) => [f.id, f.label])) as Record<FamilyId, string>;
   const [family, setFamily] = useState<FamilyId | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <section id="skills" className={cx("section", styles.skills)}>
       <div className="container">
-        <Eyebrow num="02" label="Skills" />
+        <Eyebrow num={num} label={content.eyebrow} />
         <h2 className="display" data-reveal>
-          The periodic table <em>of my stack.</em>
+          {content.title} <em>{content.em}</em>
         </h2>
         <p className={styles.intro} data-reveal>
-          {elements.length} elements in {WORDS[families.length] ?? families.length} families. Hover a tile to see
-          its logo, or pick a family to light it up.
+          {content.intro}
         </p>
 
-        <div className={styles.chips} role="group" aria-label="Highlight a family" data-reveal>
+        <div className={styles.chips} role="group" aria-label={content.chipsLabel} data-reveal>
           {families.map((f) => (
             <button
               key={f.id}
@@ -44,7 +44,7 @@ export default function Skills() {
         <div className={styles.layout}>
           <ol className={styles.table} data-reveal onMouseLeave={() => setHovered(null)}>
             {elements.map((el, i) => (
-              <li key={el.name}>
+              <li key={el.symbol}>
                 <button
                   type="button"
                   className={styles.tile}
@@ -67,10 +67,10 @@ export default function Skills() {
           <div className={styles.preview} data-reveal>
             <div className={styles.item} data-active={hovered === null || undefined} aria-hidden={hovered !== null}>
               <Cursor className={styles.cursor} />
-              <p className={styles.hint}>Hover any element to see its logo</p>
+              <p className={styles.hint}>{content.hint}</p>
             </div>
             {elements.map((el, i) => (
-              <div key={el.name} className={styles.item} data-active={hovered === i || undefined} aria-hidden={hovered !== i}>
+              <div key={el.symbol} className={styles.item} data-active={hovered === i || undefined} aria-hidden={hovered !== i}>
                 {el.logo ? (
                   // eslint-disable-next-line @next/next/no-img-element -- small local SVG logos
                   <img className={styles.logo} src={`/logos/${el.logo}.svg`} alt="" width={116} height={116} loading="lazy" />
@@ -81,7 +81,7 @@ export default function Skills() {
                 )}
                 <p className={styles.pName}>{el.name}</p>
                 <p className={styles.pMeta}>
-                  {familyLabel[el.family]} · No. {pad(i + 1)}
+                  {familyLabel[el.family]} · {content.number} {pad(i + 1)}
                 </p>
               </div>
             ))}

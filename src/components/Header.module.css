@@ -78,6 +78,15 @@
 
 /* --------------------------------------------------------------- nav */
 
+/* nav, language switch and (on small screens) the menu button, kept above the open menu sheet */
+.end {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .nav {
   position: relative;
   padding: 5px;
@@ -251,6 +260,11 @@
 @media (max-width: 900px) {
   .header {
     height: 72px;
+    gap: 12px;
+  }
+
+  .end {
+    gap: 8px;
   }
 
   .nav {
@@ -259,6 +273,13 @@
 
   .menuButton {
     display: grid;
+  }
+}
+
+/* Room for the language switch beside the menu button on the narrowest phones. */
+@media (max-width: 380px) {
+  .name {
+    display: none;
   }
 }
 

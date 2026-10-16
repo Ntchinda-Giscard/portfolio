@@ -1,9 +1,16 @@
 import { Fragment, type CSSProperties } from "react";
+import { localize, t, type Locale } from "@/lib/i18n";
 import { cx } from "@/lib/utils";
 import { ArrowRight, Check } from "../ui";
 import s from "./ledgersync.module.css";
 
+/*
+ * The app itself is French, so its screens (column names, messages, statuses)
+ * stay French in both languages. Only the explanations around them change.
+ */
+
 type Svc = "wu" | "mg" | "ria";
+type Props = { lang: Locale };
 
 const vars = (v: Record<string, string | number>) => v as CSSProperties;
 
@@ -26,6 +33,32 @@ const SHEET = [
   ["MoneyGram", "A-007", "01/09", "90 000", "2 800", "539"],
   ["Western Union", "A-031", "01/09", "12 000", "800", "154"],
 ];
+
+const MANUAL = {
+  exportHead: t("The export", "L’export"),
+  exportRest: t("summed by hand", "totalisé à la main"),
+  exportText: t(
+    "Every transfer summed per service, agency and date, posted to the right accounts, then ticked off against Sage — for each of 40+ services.",
+    "Chaque transfert totalisé par service, agence et date, imputé sur les bons comptes, puis pointé dans Sage — pour chacun des plus de 40 services.",
+  ),
+  ruleHead: t("A rule change", "Un changement de règle"),
+  ruleRest: t("needed a developer", "exigeait un développeur"),
+  ruleText: t(
+    "Commission rates and posting rules lived in the code, so every change meant a ticket, a developer and a new release. In LedgerSync they are formulas the accountants edit themselves.",
+    "Taux de commission et règles d’imputation vivaient dans le code : chaque changement voulait dire un ticket, un développeur et une nouvelle version. Dans LedgerSync, ce sont des formules que les comptables modifient eux-mêmes.",
+  ),
+  before: t("Before", "Avant"),
+  beforeNote: t("wait for a release", "attendre une version"),
+  beforeStops: [
+    t("Rate changes", "Le taux change"),
+    t("Ticket", "Ticket"),
+    t("Code change", "Modif. du code"),
+    t("Release", "Mise en prod"),
+    t("Live", "En service"),
+  ],
+  afterNote: t("next run", "traitement suivant"),
+  afterStops: [t("Rate changes", "Le taux change"), t("Formula edited", "Formule modifiée"), t("Live", "En service")],
+};
 
 function Trip({ label, note, stops, fast }: { label: string; note: string; stops: string[]; fast?: boolean }) {
   return (
@@ -52,12 +85,13 @@ function Trip({ label, note, stops, fast }: { label: string; note: string; stops
   );
 }
 
-export function ManualWork() {
+export function ManualWork({ lang }: Props) {
+  const copy = localize(MANUAL, lang);
   return (
     <div className={s.manual}>
       <article className={s.card}>
         <p className={s.cardHead}>
-          <b>The export</b> summed by hand
+          <b>{copy.exportHead}</b> {copy.exportRest}
         </p>
         <div className={s.sheet} aria-hidden="true">
           <p className={s.sheetFx}>
@@ -92,24 +126,18 @@ export function ManualWork() {
             <span>12 480 lignes</span>
           </p>
         </div>
-        <p className={s.cardText}>
-          Every transfer summed per service, agency and date, posted to the right accounts, then ticked off against
-          Sage — for each of 40+ services.
-        </p>
+        <p className={s.cardText}>{copy.exportText}</p>
       </article>
 
       <article className={s.card}>
         <p className={s.cardHead}>
-          <b>A rule change</b> needed a developer
+          <b>{copy.ruleHead}</b> {copy.ruleRest}
         </p>
         <div className={s.change} aria-hidden="true">
-          <Trip label="Before" note="wait for a release" stops={["Rate changes", "Ticket", "Code change", "Release", "Live"]} />
-          <Trip label="LedgerSync" note="next run" stops={["Rate changes", "Formula edited", "Live"]} fast />
+          <Trip label={copy.before} note={copy.beforeNote} stops={copy.beforeStops} />
+          <Trip label="LedgerSync" note={copy.afterNote} stops={copy.afterStops} fast />
         </div>
-        <p className={s.cardText}>
-          Commission rates and posting rules lived in the code, so every change meant a ticket, a developer and a new
-          release. In LedgerSync they are formulas the accountants edit themselves.
-        </p>
+        <p className={s.cardText}>{copy.ruleText}</p>
       </article>
     </div>
   );
@@ -137,31 +165,76 @@ const txY = (n: number) => 22 + n * 54;
 const groupY = (g: number) => 44 + g * 116;
 const mergePath = (n: number, g: number) => `M0 ${txY(n)} C 36 ${txY(n)} 36 ${groupY(g)} 72 ${groupY(g)}`;
 
-const FLOW = [
-  {
-    fr: "Chargement",
-    en: "Load",
-    text: "Drop the Integra export, Excel or CSV. The right sheet, the header row and the month are detected for you.",
-  },
-  { fr: "Traitement", en: "Review", text: "Browse the raw transfers by service or agency and remove lines that shouldn’t count." },
-  { fr: "Résultat", en: "Aggregate", text: "One row per service, agency and date, with amounts, fees and tax summed." },
-  {
-    fr: "Comptabilisation",
-    en: "Post",
-    text: "Each service’s posting schema turns those rows into debit and credit lines, piece by piece.",
-  },
-  { fr: "Fichier Interface", en: "Import", text: "Load Sage 1000’s interface files — one per service and day — and check their period." },
-  { fr: "Rapprochement", en: "Reconcile", text: "Compare debits and credits per service, account and date, and flag every gap." },
-  { fr: "Simulation", en: "Next", text: "In development.", soon: true },
-];
+const PIPELINE = {
+  from: t("Integra · 6 transfers", "Integra · 6 transferts"),
+  to: t("Intermediate table · 3 rows", "Table intermédiaire · 3 lignes"),
+  note: t(
+    "Each transfer joins the row for its service, agency and date. Amounts, fees and tax are summed; the per-transfer reference is dropped.",
+    "Chaque transfert rejoint la ligne de son service, de son agence et de sa date. Montants, frais et taxes sont additionnés ; la référence propre au transfert disparaît.",
+  ),
+  head: t("Module M1 · seven steps", "Module M1 · sept étapes"),
+  /** The app's own step names (French), with an English gloss on the English site. */
+  flow: [
+    {
+      name: "Chargement",
+      gloss: t("Load", ""),
+      text: t(
+        "Drop the Integra export, Excel or CSV. The right sheet, the header row and the month are detected for you.",
+        "Déposez l’export Integra, Excel ou CSV. La bonne feuille, la ligne d’en-tête et le mois sont détectés pour vous.",
+      ),
+    },
+    {
+      name: "Traitement",
+      gloss: t("Review", ""),
+      text: t(
+        "Browse the raw transfers by service or agency and remove lines that shouldn’t count.",
+        "Parcourez les transferts bruts par service ou par agence et retirez les lignes qui ne doivent pas compter.",
+      ),
+    },
+    {
+      name: "Résultat",
+      gloss: t("Aggregate", ""),
+      text: t(
+        "One row per service, agency and date, with amounts, fees and tax summed.",
+        "Une ligne par service, agence et date, avec montants, frais et taxes additionnés.",
+      ),
+    },
+    {
+      name: "Comptabilisation",
+      gloss: t("Post", ""),
+      text: t(
+        "Each service’s posting schema turns those rows into debit and credit lines, piece by piece.",
+        "Le schéma de comptabilisation de chaque service transforme ces lignes en écritures au débit et au crédit, pièce par pièce.",
+      ),
+    },
+    {
+      name: "Fichier Interface",
+      gloss: t("Import", ""),
+      text: t(
+        "Load Sage 1000’s interface files — one per service and day — and check their period.",
+        "Chargez les fichiers d’interface Sage 1000 — un par service et par jour — et vérifiez leur période.",
+      ),
+    },
+    {
+      name: "Rapprochement",
+      gloss: t("Reconcile", ""),
+      text: t(
+        "Compare debits and credits per service, account and date, and flag every gap.",
+        "Comparez débits et crédits par service, compte et date, et signalez chaque écart.",
+      ),
+    },
+    { name: "Simulation", gloss: t("Next", ""), text: t("In development.", "En développement."), soon: true },
+  ],
+};
 
-export function Pipeline() {
+export function Pipeline({ lang }: Props) {
+  const copy = localize(PIPELINE, lang);
   return (
     <div className={s.pipe}>
       <div className={s.merge}>
         <p className={s.mergeHead}>
-          <span>Integra · 6 transfers</span>
-          <span>Intermediate table · 3 rows</span>
+          <span>{copy.from}</span>
+          <span>{copy.to}</span>
         </p>
         <div className={s.mergeBody} aria-hidden="true">
           <ul className={s.txs}>
@@ -212,24 +285,21 @@ export function Pipeline() {
             })}
           </ul>
         </div>
-        <p className={s.mergeNote}>
-          Each transfer joins the row for its service, agency and date. Amounts, fees and tax are summed; the
-          per-transfer reference is dropped.
-        </p>
+        <p className={s.mergeNote}>{copy.note}</p>
       </div>
 
       <div className={s.flow7}>
-        <p className={s.flowHead}>Module M1 · seven steps</p>
+        <p className={s.flowHead}>{copy.head}</p>
         <ol className={s.flowList}>
-          {FLOW.map((step, n) => (
-            <li key={step.fr} className={s.flowItem} data-soon={step.soon || undefined}>
+          {copy.flow.map((step, n) => (
+            <li key={step.name} className={s.flowItem} data-soon={step.soon || undefined}>
               <span className={s.flowDot} style={vars({ "--i": n })}>
                 {n + 1}
               </span>
               <div>
                 <p className={s.flowName}>
-                  {step.fr}
-                  <small>{step.en}</small>
+                  {step.name}
+                  {step.gloss && <small>{step.gloss}</small>}
                 </p>
                 <p className={s.flowText}>{step.text}</p>
               </div>
@@ -250,7 +320,18 @@ const PIECE: { compte: string; libelle: string; debit?: string; credit?: string 
   { compte: "TVA", libelle: "TVA sur commissions", credit: "616" },
 ];
 
-export function BalancedPiece() {
+const BALANCE = {
+  tableCaption: t("Western Union piece, 02/09/2025", "Pièce Western Union du 02/09/2025"),
+  caption: t("One piece = one service on one date. Illustrative figures.", "Une pièce = un service à une date. Chiffres illustratifs."),
+  ruleHead: t("No rule, no posting.", "Pas de règle, pas d’écriture."),
+  ruleText: t(
+    "A service without a posting schema is never posted by some hidden default — it is set aside and counted on screen, so nothing passes for posted that nobody configured.",
+    "Un service sans schéma de comptabilisation n’est jamais imputé par un défaut caché — il est mis de côté et compté à l’écran : rien ne passe pour comptabilisé sans avoir été paramétré.",
+  ),
+};
+
+export function BalancedPiece({ lang }: Props) {
+  const copy = localize(BALANCE, lang);
   return (
     <div className={s.balance}>
       <div className={s.ledger}>
@@ -281,7 +362,7 @@ export function BalancedPiece() {
         </div>
 
         <table className={s.journal}>
-          <caption className="sr-only">Pièce Western Union du 02/09/2025</caption>
+          <caption className="sr-only">{copy.tableCaption}</caption>
           <thead>
             <tr>
               <th>Compte</th>
@@ -312,7 +393,7 @@ export function BalancedPiece() {
         <p className={cx(s.verdict, s.in5)}>
           <Check /> Pièce équilibrée · |Σ D − Σ C| ≤ 0,01 XAF
         </p>
-        <p className={s.caption}>One piece = one service on one date. Illustrative figures.</p>
+        <p className={s.caption}>{copy.caption}</p>
       </div>
 
       <div className={s.fixes}>
@@ -344,8 +425,8 @@ export function BalancedPiece() {
           </div>
         </article>
         <article className={s.rule}>
-          <b>No rule, no posting.</b>A service without a posting schema is never posted by some hidden default — it is
-          set aside and counted on screen, so nothing passes for posted that nobody configured.
+          <b>{copy.ruleHead}</b>
+          {copy.ruleText}
         </article>
       </div>
     </div>
@@ -376,13 +457,23 @@ const reconPath = (from: number, to: number) => `M0 ${rowY(from)} C 60 ${rowY(fr
 const STAGGER = 1.6;
 const TRAVEL = 1.2;
 
-export function Reconcile() {
+const RECONCILE = {
+  integra: t("Generated from Integra", "Généré depuis Integra"),
+  sage: t("Sage 1000 interface file", "Fichier d’interface Sage 1000"),
+  apart: t(
+    "No service in the label, so nothing says where it belongs — it is reconciled on its own instead of guessed.",
+    "Aucun service dans le libellé, rien ne dit où la rattacher — elle est rapprochée à part plutôt que devinée.",
+  ),
+};
+
+export function Reconcile({ lang }: Props) {
+  const copy = localize(RECONCILE, lang);
   return (
     <div className={s.recon}>
       <div className={s.reconWide}>
         <p className={s.reconCols}>
-          <span>Generated from Integra</span>
-          <span>Sage 1000 interface file</span>
+          <span>{copy.integra}</span>
+          <span>{copy.sage}</span>
         </p>
         <div className={s.reconBody}>
           <ul className={s.rlist}>
@@ -478,7 +569,7 @@ export function Reconcile() {
         </span>
         <span>
           <b>TVA collectée sur commissions MG · C 1 078</b>
-          No service in the label, so nothing says where it belongs — it is reconciled on its own instead of guessed.
+          {copy.apart}
         </span>
         <span className={s.status} data-status="apart">
           À part
@@ -505,32 +596,45 @@ export function Reconcile() {
 
 /* ------------------------------------------------------------- desktop */
 
-const CMDS: { call: string; res: string; bad?: boolean; note?: string }[] = [
-  { call: 'invoke("login")', res: "Argon2id · password verified" },
-  { call: 'invoke("update_service")', res: "services.update · allowed" },
-  {
-    call: 'invoke("delete_agency")',
-    res: "refused · agencies.delete",
-    bad: true,
-    note: "Permission « agencies.delete » requise. Demandez-la à un administrateur.",
-  },
-  {
-    call: 'invoke("set_user_active", false)',
-    res: "refused · last active admin",
-    bad: true,
-    note: "Impossible : il doit rester au moins un administrateur actif.",
-  },
-];
+const DESKTOP = {
+  interfaceTech: t(
+    "Next.js static export · React 19 · Tailwind 4 · shadcn/ui · Zustand",
+    "Export statique Next.js · React 19 · Tailwind 4 · shadcn/ui · Zustand",
+  ),
+  commands: t("32 commands", "32 commandes"),
+  coreTech: t("Commands · permission checks · Argon2", "Commandes · contrôle des permissions · Argon2"),
+  queries: t("queries", "requêtes"),
+  sqlite: t("SQLite · bundled", "SQLite · embarqué"),
+  sqliteTech: t("On the accountant’s machine", "Sur le poste du comptable"),
+  log: t("Command log", "Journal des commandes"),
+  cmds: [
+    { call: 'invoke("login")', res: t("Argon2id · password verified", "Argon2id · mot de passe vérifié") },
+    { call: 'invoke("update_service")', res: t("services.update · allowed", "services.update · autorisé") },
+    {
+      call: 'invoke("delete_agency")',
+      res: t("refused · agencies.delete", "refusé · agencies.delete"),
+      bad: true,
+      note: "Permission « agencies.delete » requise. Demandez-la à un administrateur.",
+    },
+    {
+      call: 'invoke("set_user_active", false)',
+      res: t("refused · last active admin", "refusé · dernier admin actif"),
+      bad: true,
+      note: "Impossible : il doit rester au moins un administrateur actif.",
+    },
+  ],
+  guardsLabel: t("Safeguards", "Garde-fous"),
+  guards: [
+    t("Argon2id password hashing", "Mots de passe hachés en Argon2id"),
+    t("10 permissions, none granted by default", "10 permissions, aucune accordée par défaut"),
+    t("Default password must be changed", "Mot de passe par défaut à changer"),
+    t("The last active admin can’t be removed", "Le dernier admin actif ne peut pas être retiré"),
+    t("Data stays on the accountant’s machine", "Les données restent sur le poste du comptable"),
+  ],
+};
 
-const GUARDS = [
-  "Argon2id password hashing",
-  "10 permissions, none granted by default",
-  "Default password must be changed",
-  "The last active admin can’t be removed",
-  "Data stays on the accountant’s machine",
-];
-
-export function DesktopStack() {
+export function DesktopStack({ lang }: Props) {
+  const copy = localize(DESKTOP, lang);
   return (
     <>
       <div className={s.desk}>
@@ -541,7 +645,7 @@ export function DesktopStack() {
               <img src="/logos/nextjs.svg" alt="" width={20} height={20} loading="lazy" />
               Interface
             </p>
-            <p className={s.tierTech}>Next.js static export · React 19 · Tailwind 4 · shadcn/ui · Zustand</p>
+            <p className={s.tierTech}>{copy.interfaceTech}</p>
             <p className={s.tierChips}>
               <span>Paramétrage</span>
               <span>Module 1</span>
@@ -553,7 +657,7 @@ export function DesktopStack() {
             <i />
             <i />
             <span>invoke()</span>
-            <span>32 commands</span>
+            <span>{copy.commands}</span>
           </div>
           <div className={s.tier} data-tier="core">
             <p className={s.tierName}>
@@ -561,7 +665,7 @@ export function DesktopStack() {
               <img src="/logos/tauri.svg" alt="" width={20} height={20} loading="lazy" />
               Rust core · Tauri 2
             </p>
-            <p className={s.tierTech}>Commands · permission checks · Argon2</p>
+            <p className={s.tierTech}>{copy.coreTech}</p>
             <p className={s.tierChips}>
               <span>auth.rs</span>
               <span>db.rs</span>
@@ -573,15 +677,15 @@ export function DesktopStack() {
             <i />
             <i />
             <span>rusqlite</span>
-            <span>queries</span>
+            <span>{copy.queries}</span>
           </div>
           <div className={s.tier}>
             <p className={s.tierName}>
               {/* eslint-disable-next-line @next/next/no-img-element -- small local SVG logos */}
               <img src="/logos/sqlite.svg" alt="" width={20} height={20} loading="lazy" />
-              SQLite · bundled
+              {copy.sqlite}
             </p>
-            <p className={s.tierTech}>On the accountant’s machine</p>
+            <p className={s.tierTech}>{copy.sqliteTech}</p>
             <p className={s.tierChips}>
               <span>users</span>
               <span>services</span>
@@ -595,11 +699,11 @@ export function DesktopStack() {
 
         <div className={s.cmds}>
           <p className={s.cmdsHead}>
-            <span>Command log</span>
+            <span>{copy.log}</span>
             <span>comptable</span>
           </p>
           <ul>
-            {CMDS.map((cmd, n) => (
+            {copy.cmds.map((cmd, n) => (
               <li key={cmd.call} style={vars({ "--i": n })}>
                 <code>{cmd.call}</code>
                 <span className={s.cmdRes} data-bad={cmd.bad || undefined}>
@@ -612,8 +716,8 @@ export function DesktopStack() {
         </div>
       </div>
 
-      <ul className={s.guards} aria-label="Safeguards">
-        {GUARDS.map((guard) => (
+      <ul className={s.guards} aria-label={copy.guardsLabel}>
+        {copy.guards.map((guard) => (
           <li key={guard}>
             <Check /> {guard}
           </li>

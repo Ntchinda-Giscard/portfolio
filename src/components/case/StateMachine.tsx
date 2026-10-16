@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { localize, t, type Locale } from "@/lib/i18n";
 import { cx } from "@/lib/utils";
 import s from "./wazalink.module.css";
 
@@ -39,49 +40,58 @@ const EDGES: Record<string, string> = {
   "DELETED_PENDING>DELETED_CONFIRMED": "M735 386 L785 386",
 };
 
-const SCENARIOS: { label: string; record: string; steps: [StateId, string][] }[] = [
+const QUEUED = t("queued in the ledger", "en file dans le registre");
+const TO_HRM = t("writing to Sage HRM", "écriture dans Sage HRM");
+const TO_X3 = t("SOAP import to Sage X3", "import SOAP vers Sage X3");
+
+const SCENARIOS = [
   {
-    label: "Happy path",
+    label: t("Happy path", "Cas nominal"),
     record: "pesee #4821",
     steps: [
-      ["PENDING_SEND", "queued in the ledger"],
-      ["SENDING", "writing to Sage HRM"],
-      ["SENT_UNCONFIRMED", "written — waiting for confirmation"],
-      ["CONFIRMED", "confirmed · transfer flag set"],
+      { state: "PENDING_SEND" as StateId, text: QUEUED },
+      { state: "SENDING" as StateId, text: TO_HRM },
+      { state: "SENT_UNCONFIRMED" as StateId, text: t("written — waiting for confirmation", "écrit — en attente de confirmation") },
+      { state: "CONFIRMED" as StateId, text: t("confirmed · transfer flag set", "confirmé · indicateur de transfert posé") },
     ],
   },
   {
-    label: "VPN cut",
+    label: t("VPN cut", "Coupure VPN"),
     record: "bon_livraison #118",
     steps: [
-      ["PENDING_SEND", "queued in the ledger"],
-      ["SENDING", "SOAP import to Sage X3"],
-      ["ERROR", "connection dropped — nothing marked as sent"],
-      ["RETRY_SCHEDULED", "retry #1 on the next run"],
-      ["SENDING", "SOAP import to Sage X3"],
-      ["SENT_UNCONFIRMED", "accepted by X3"],
-      ["CONFIRMED", "confirmed — sent exactly once"],
+      { state: "PENDING_SEND" as StateId, text: QUEUED },
+      { state: "SENDING" as StateId, text: TO_X3 },
+      {
+        state: "ERROR" as StateId,
+        text: t("connection dropped — nothing marked as sent", "connexion perdue — rien n’est marqué comme envoyé"),
+      },
+      { state: "RETRY_SCHEDULED" as StateId, text: t("retry #1 on the next run", "reprise n°1 au cycle suivant") },
+      { state: "SENDING" as StateId, text: TO_X3 },
+      { state: "SENT_UNCONFIRMED" as StateId, text: t("accepted by X3", "accepté par X3") },
+      { state: "CONFIRMED" as StateId, text: t("confirmed — sent exactly once", "confirmé — envoyé une seule fois") },
     ],
   },
   {
-    label: "Bad data",
+    label: t("Bad data", "Donnée invalide"),
     record: "pesee #4907",
     steps: [
-      ["PENDING_SEND", "queued in the ledger"],
-      ["SENDING", "writing to Sage HRM"],
-      ["ERROR", "rejected: invalid weighing date"],
-      ["BLOCKED", "held for review · alert logged"],
+      { state: "PENDING_SEND" as StateId, text: QUEUED },
+      { state: "SENDING" as StateId, text: TO_HRM },
+      { state: "ERROR" as StateId, text: t("rejected: invalid weighing date", "rejeté : date de pesée invalide") },
+      { state: "BLOCKED" as StateId, text: t("held for review · alert logged", "en attente de revue · alerte consignée") },
     ],
   },
   {
-    label: "Deletion",
+    label: t("Deletion", "Suppression"),
     record: "planteur #77",
     steps: [
-      ["DELETED_PENDING", "deleted at the source"],
-      ["DELETED_CONFIRMED", "removal confirmed downstream"],
+      { state: "DELETED_PENDING" as StateId, text: t("deleted at the source", "supprimé à la source") },
+      { state: "DELETED_CONFIRMED" as StateId, text: t("removal confirmed downstream", "suppression confirmée en aval") },
     ],
   },
 ];
+
+const SCENARIO_LABEL = t("Scenario", "Scénario");
 
 const STEP_MS = 1100;
 const PAUSE_MS = 2000;
@@ -90,7 +100,8 @@ function clock(i: number) {
   return `12:04:${String(9 + i * 2).padStart(2, "0")}`;
 }
 
-export default function StateMachine() {
+export default function StateMachine({ lang }: { lang: Locale }) {
+  const scenarios = localize(SCENARIOS, lang);
   const boardRef = useRef<HTMLDivElement>(null);
   const [scenario, setScenario] = useState(0);
   const [step, setStep] = useState(0);
@@ -127,18 +138,18 @@ export default function StateMachine() {
     setStep(running ? 0 : SCENARIOS[i].steps.length - 1);
   };
 
-  const current = SCENARIOS[scenario];
+  const current = scenarios[scenario];
   const path = current.steps.slice(0, step + 1);
-  const active = path[path.length - 1][0];
-  const visited = new Set(path.map(([id]) => id));
-  const edge = step > 0 ? `${path[step - 1][0]}>${active}` : "";
+  const active = path[path.length - 1].state;
+  const visited = new Set(path.map(({ state }) => state));
+  const edge = step > 0 ? `${path[step - 1].state}>${active}` : "";
 
   return (
     <div className={s.sm}>
-      <div className={s.smTabs} role="tablist" aria-label="Scenario">
-        {SCENARIOS.map((sc, i) => (
+      <div className={s.smTabs} role="tablist" aria-label={localize(SCENARIO_LABEL, lang)}>
+        {scenarios.map((sc, i) => (
           <button
-            key={sc.label}
+            key={sc.record}
             type="button"
             role="tab"
             aria-selected={i === scenario}
@@ -180,11 +191,11 @@ export default function StateMachine() {
             <span>{current.label}</span>
           </p>
           <ol>
-            {path.map(([id, text], i) => (
+            {path.map(({ state, text }, i) => (
               <li key={`${scenario}-${i}`}>
                 <span className={s.smTime}>{clock(i)}</span>
-                <span className={s.smState} data-state={id}>
-                  {id}
+                <span className={s.smState} data-state={state}>
+                  {state}
                 </span>
                 <span className={s.smText}>{text}</span>
               </li>

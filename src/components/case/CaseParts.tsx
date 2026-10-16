@@ -1,15 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { CaseSection, CaseStudy } from "@/content/case-studies";
-import { profile } from "@/content/portfolio";
+import type { CaseSection, CaseStudy, CaseUi } from "@/content/case-studies";
 import { ArrowRight, Shield } from "../ui";
 import s from "./case.module.css";
 
-export function CaseHero({ study, visual }: { study: CaseStudy; visual: ReactNode }) {
+export function CaseHero({ study, ui, visual }: { study: CaseStudy; ui: CaseUi; visual: ReactNode }) {
   return (
     <section className={`container ${s.hero}`}>
       <p className={s.private} data-reveal>
-        <Shield /> Case study · Private client project
+        <Shield /> {ui.badge}
       </p>
       <h1 className={s.title} data-reveal>
         {study.title}
@@ -58,16 +57,16 @@ export function CaseBlock({ section, children }: { section: CaseSection; childre
   );
 }
 
-export function CaseOutcome({ study }: { study: CaseStudy }) {
+export function CaseOutcome({ study, ui, name }: { study: CaseStudy; ui: CaseUi; name: string }) {
   return (
     <section className={`container ${s.section}`}>
       <p className="eyebrow" data-reveal>
         <span className="eyebrow-num">07</span>
         <span className="eyebrow-rule" aria-hidden="true" />
-        <span>Outcome</span>
+        <span>{ui.outcome}</span>
       </p>
       <h2 className={`display ${s.sectionTitle}`} data-reveal>
-        In <em>numbers.</em>
+        {ui.numbersTitle} <em>{ui.numbersEm}</em>
       </h2>
       <div className={s.stats} data-reveal>
         {study.stats.map((stat) => (
@@ -81,7 +80,7 @@ export function CaseOutcome({ study }: { study: CaseStudy }) {
           </div>
         ))}
       </div>
-      <ul className={s.stack} aria-label="Stack" data-reveal>
+      <ul className={s.stack} aria-label={ui.stack} data-reveal>
         {study.stack.map((tech) => (
           <li key={tech.name}>
             {tech.logo ? (
@@ -96,7 +95,7 @@ export function CaseOutcome({ study }: { study: CaseStudy }) {
       </ul>
       <Link href={study.next.href} className={s.next} data-reveal>
         <span>
-          <span className={s.nextLabel}>Next case study</span>
+          <span className={s.nextLabel}>{ui.next}</span>
           <span className={s.nextTitle} style={{ display: "block" }}>
             {study.next.title}
             <em>{study.next.tagline}</em>
@@ -107,8 +106,8 @@ export function CaseOutcome({ study }: { study: CaseStudy }) {
         </span>
       </Link>
       <footer className={s.footer}>
-        <span>© 2026 {profile.fullName}</span>
-        <Link href="/#work">Back to all work</Link>
+        <span>© 2026 {name}</span>
+        <Link href={ui.workHref}>{ui.backToWork}</Link>
       </footer>
     </section>
   );

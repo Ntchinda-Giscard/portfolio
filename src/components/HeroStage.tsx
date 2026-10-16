@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Content } from "@/content/portfolio";
+import { fill } from "@/lib/i18n";
 import { cx } from "@/lib/utils";
 import { Pause, Play, SoundOff, SoundOn } from "./ui";
 import styles from "./Hero.module.css";
@@ -34,9 +36,9 @@ void main() {
   gl_FragColor = vec4(min(color, vec3(alpha)), alpha);
 }`;
 
-type Props = { video: string; poster: string; name: string };
+type Props = { video: string; poster: string; name: string; labels: Content["hero"]["stage"] };
 
-export default function HeroStage({ video: src, poster, name }: Props) {
+export default function HeroStage({ video: src, poster, name, labels }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -236,7 +238,7 @@ export default function HeroStage({ video: src, poster, name }: Props) {
     <div ref={stageRef} className={cx(styles.stage, webgl && ready && styles.ready)}>
       <div className={styles.figure}>
         {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized transparent first frame, shown until WebGL paints */}
-        <img className={styles.poster} src={poster} alt={`3D character of ${name}`} fetchPriority="high" />
+        <img className={styles.poster} src={poster} alt={fill(labels.posterAlt, { name })} fetchPriority="high" />
         <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
         <video
           ref={videoRef}
@@ -257,8 +259,8 @@ export default function HeroStage({ video: src, poster, name }: Props) {
             type="button"
             className={styles.control}
             onClick={togglePlay}
-            aria-label={playing ? "Pause intro video" : "Play intro video"}
-            data-label={playing ? "Pause" : "Play"}
+            aria-label={playing ? labels.pause : labels.play}
+            data-label={playing ? labels.pauseShort : labels.playShort}
           >
             {playing ? <Pause /> : <Play />}
           </button>
@@ -267,8 +269,8 @@ export default function HeroStage({ video: src, poster, name }: Props) {
             className={cx(styles.control, styles.controlLight)}
             onClick={toggleSound}
             aria-pressed={!muted}
-            aria-label={muted ? "Play the intro with sound" : "Mute the intro"}
-            data-label={muted ? "Hear my intro" : "Mute"}
+            aria-label={muted ? labels.soundOn : labels.soundOff}
+            data-label={muted ? labels.soundOnShort : labels.soundOffShort}
           >
             {muted ? <SoundOff /> : <SoundOn />}
           </button>

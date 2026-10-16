@@ -1,32 +1,34 @@
 import type { CSSProperties } from "react";
-import { certifications, certificationsAll, certificationsIntro } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
 import { pad } from "@/lib/utils";
 import { ArrowUpRight, Eyebrow } from "./ui";
 import styles from "./Certifications.module.css";
 
-export default function Certifications() {
+type Props = { num: string; content: Content["certifications"] };
+
+export default function Certifications({ num, content }: Props) {
   return (
     <section id="certifications" className={`section ${styles.certs}`}>
       <div className={`container ${styles.grid}`}>
         <div className={styles.side}>
-          <Eyebrow num="04" label="Certifications" />
+          <Eyebrow num={num} label={content.eyebrow} />
           <h2 className="display" data-reveal>
-            Always
+            {content.title}
             <br />
-            <em>learning.</em>
+            <em>{content.em}</em>
           </h2>
           <p className={styles.intro} data-reveal>
-            {certificationsIntro}
+            {content.intro}
           </p>
-          {certificationsAll && (
-            <a className={styles.all} href={certificationsAll} target="_blank" rel="noreferrer" data-reveal>
-              See all on LinkedIn <ArrowUpRight />
+          {content.allUrl && (
+            <a className={styles.all} href={content.allUrl} target="_blank" rel="noreferrer" data-reveal>
+              {content.all} <ArrowUpRight />
             </a>
           )}
         </div>
 
         <ol className={styles.list}>
-          {certifications.map((cert, i) => {
+          {content.items.map((cert, i) => {
             const body = (
               <>
                 <span className={styles.num}>{pad(i + 1)}</span>

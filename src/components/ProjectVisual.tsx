@@ -1,18 +1,48 @@
 import type { CSSProperties } from "react";
-import type { Project } from "@/content/portfolio";
+import type { Content } from "@/content/portfolio";
+import { localize, t, type Locale, type Localized } from "@/lib/i18n";
 import { Check } from "./ui";
 import s from "./ProjectVisual.module.css";
 
+type Kind = Content["work"]["projects"][number]["visual"];
+
+/** The words inside the mock screens. Record ids and figures stay as they are. */
+const COPY = {
+  applied: t("Applied in one swipe", "Candidature en un swipe"),
+  tailored: t("CV + cover letter tailored by AI", "CV + lettre adaptés par l’IA"),
+  match: t("AI match", "Match IA"),
+  skip: t("unchanged · skip", "inchangé · ignoré"),
+  retry: t("retry #2 · next run", "reprise n°2 · prochain cycle"),
+  synced: t("synced", "synchronisé"),
+  hr: t("SQL · HR", "SQL · RH"),
+  field: t("REST · field app", "REST · appli terrain"),
+  state: t("state 7/9 · sent", "état 7/9 · envoyé"),
+  log: t("Transfer log", "Journal des transferts"),
+  live: t("Live", "En direct"),
+  window: t("LedgerSync — Reconciliation · Sep 2025", "LedgerSync — Rapprochement · sept. 2025"),
+  status: t("Status", "Statut"),
+  matched: t("Matched", "Rapproché"),
+  review: t("Review", "À vérifier"),
+  balance: t("Debit 55 000 000 = Credit 55 000 000", "Débit 55 000 000 = Crédit 55 000 000"),
+  balanced: t("Balanced", "Équilibré"),
+  edited: t("Formula updated by Accounting", "Formule modifiée par la comptabilité"),
+  editedNote: t("Live in seconds · no code change", "Active en quelques secondes · sans code"),
+  rule: t("Rule · Ria", "Règle · Ria"),
+};
+
+type Copy = Localized<typeof COPY>;
+
 /** Product visuals for the Work panels, drawn in HTML/CSS (plus one real screenshot). */
-export default function ProjectVisual({ kind }: { kind: Project["visual"] }) {
-  if (kind === "kamjob") return <KamJob />;
-  if (kind === "integration") return <Integration />;
-  return <Ledger />;
+export default function ProjectVisual({ kind, lang }: { kind: Kind; lang: Locale }) {
+  const copy = localize(COPY, lang);
+  if (kind === "kamjob") return <KamJob copy={copy} />;
+  if (kind === "integration") return <Integration copy={copy} />;
+  return <Ledger copy={copy} />;
 }
 
 /* ---------------------------------------------------------------- KamJob */
 
-function KamJob() {
+function KamJob({ copy }: { copy: Copy }) {
   return (
     <div className={s.stage} aria-hidden="true">
       <div className={s.phone}>
@@ -24,8 +54,8 @@ function KamJob() {
           <Check />
         </span>
         <span>
-          <b>Applied in one swipe</b>
-          <small>CV + cover letter tailored by AI</small>
+          <b>{copy.applied}</b>
+          <small>{copy.tailored}</small>
         </span>
       </div>
       <div className={s.match}>
@@ -35,7 +65,7 @@ function KamJob() {
         </svg>
         <span>
           <b>94%</b>
-          <small>AI match</small>
+          <small>{copy.match}</small>
         </span>
       </div>
     </div>
@@ -44,14 +74,14 @@ function KamJob() {
 
 /* ------------------------------------------------------------- WAZALINK */
 
-const LOG = [
-  { time: "12:04:09", record: "pesee #4821", status: "skip", text: "unchanged · skip" },
-  { time: "12:04:11", record: "bon_livraison #118", status: "retry", text: "retry #2 · next run" },
-  { time: "12:04:15", record: "planteur #77", status: "ok", text: "synced" },
-  { time: "12:04:18", record: "bon_livraison #118", status: "ok", text: "synced" },
-];
+function Integration({ copy }: { copy: Copy }) {
+  const log = [
+    { time: "12:04:09", record: "pesee #4821", status: "skip", text: copy.skip },
+    { time: "12:04:11", record: "bon_livraison #118", status: "retry", text: copy.retry },
+    { time: "12:04:15", record: "planteur #77", status: "ok", text: copy.synced },
+    { time: "12:04:18", record: "bon_livraison #118", status: "ok", text: copy.synced },
+  ];
 
-function Integration() {
   return (
     <div className={s.stage} aria-hidden="true">
       <svg className={s.wires} viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -66,11 +96,11 @@ function Integration() {
       </div>
       <div className={`${s.node} ${s.hrm}`}>
         <b>Sage HRM</b>
-        <small>SQL · HR</small>
+        <small>{copy.hr}</small>
       </div>
       <div className={`${s.node} ${s.capi}`}>
         <b>CAPI</b>
-        <small>REST · field app</small>
+        <small>{copy.field}</small>
       </div>
 
       <div className={s.hub}>
@@ -83,19 +113,19 @@ function Integration() {
             <i key={i} data-state={i < 6 ? "done" : i === 6 ? "active" : undefined} />
           ))}
         </div>
-        <p className={s.stateLabel}>state 7/9 · sent</p>
+        <p className={s.stateLabel}>{copy.state}</p>
       </div>
 
       <div className={s.log}>
         <p className={s.logHead}>
-          <span>Transfer log</span>
+          <span>{copy.log}</span>
           <span className={s.live}>
             <i />
-            Live
+            {copy.live}
           </span>
         </p>
         <ul>
-          {LOG.map((line, i) => (
+          {log.map((line, i) => (
             <li key={i} style={{ "--i": i } as CSSProperties}>
               <span>{line.time}</span>
               <span>{line.record}</span>
@@ -118,7 +148,7 @@ const ROWS = [
   { service: "MTN MoMo", integra: "9 540 000", sage: "9 540 000", ok: true },
 ];
 
-function Ledger() {
+function Ledger({ copy }: { copy: Copy }) {
   return (
     <div className={s.stage} aria-hidden="true">
       <div className={s.window}>
@@ -128,7 +158,7 @@ function Ledger() {
             <i />
             <i />
           </span>
-          <span>LedgerSync — Reconciliation · Sep 2025</span>
+          <span>{copy.window}</span>
         </p>
         <p className={s.formula}>
           <b>ƒx</b>
@@ -142,7 +172,7 @@ function Ledger() {
               <th>Service</th>
               <th>Integra</th>
               <th>Sage 1000</th>
-              <th>Status</th>
+              <th>{copy.status}</th>
             </tr>
           </thead>
           <tbody>
@@ -152,16 +182,16 @@ function Ledger() {
                 <td>{row.integra}</td>
                 <td>{row.sage}</td>
                 <td>
-                  <span className={s.status}>{row.ok ? "Matched" : "Review"}</span>
+                  <span className={s.status}>{row.ok ? copy.matched : copy.review}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         <p className={s.balance}>
-          <span>Debit 55 000 000 = Credit 55 000 000</span>
+          <span>{copy.balance}</span>
           <b>
-            <Check /> Balanced
+            <Check /> {copy.balanced}
           </b>
         </p>
       </div>
@@ -169,13 +199,13 @@ function Ledger() {
       <div className={s.edited}>
         <span className={s.avatar}>AC</span>
         <span>
-          <b>Formula updated by Accounting</b>
-          <small>Live in seconds · no code change</small>
+          <b>{copy.edited}</b>
+          <small>{copy.editedNote}</small>
         </span>
       </div>
 
       <div className={s.rule}>
-        <p>Rule · Ria</p>
+        <p>{copy.rule}</p>
         <pre>{`{
   "debit": "4711",
   "credit": "5121",

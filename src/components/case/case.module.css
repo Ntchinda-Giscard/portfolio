@@ -46,6 +46,12 @@
   opacity: 0;
 }
 
+.headerEnd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .headerNav {
   display: flex;
   gap: 2px;
