@@ -217,6 +217,25 @@ export const Alert = (p: IconProps) => (
   </Icon>
 );
 
+export const Code = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14" />
+  </Icon>
+);
+
+export const UserCheck = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15.5 11.5l2 2 3.5-3.5" />
+  </Icon>
+);
+
+export const Activity = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 12h4l2.5-6 4 12 2.5-6H21" />
+  </Icon>
+);
+
 export const Calendar = (p: IconProps) => (
   <Icon {...p}>
     <rect x="4" y="5.5" width="16" height="14.5" rx="2.5" />

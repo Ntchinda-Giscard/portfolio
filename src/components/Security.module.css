@@ -49,6 +49,15 @@
   margin-top: clamp(48px, 6vw, 72px);
 }
 
+.listLabel {
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .tabs {
   border-top: 1px solid var(--line);
 }
@@ -57,17 +66,23 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: 26px 34px minmax(0, 1fr) auto;
+  grid-template-columns: 38px 32px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  padding: 15px 18px;
+  padding: 11px 16px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   color: var(--ink);
 }
 
-/* the selected layer gets the same dark wipe as the certification rows */
+/* the LLM Top 10 entry sits apart from the ten OWASP categories */
+.tab[data-llm] {
+  margin-top: 12px;
+  border-top: 1px dashed var(--line-strong);
+}
+
+/* the selected risk gets the same dark wipe as the certification rows */
 .tab::before {
   content: "";
   position: absolute;
@@ -85,20 +100,20 @@
   transform-origin: left center;
 }
 
-.tabNum {
+.tabCode {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
   transition: color 0.4s ease;
 }
 
 .tabIcon {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   background: #fff;
   box-shadow:
     0 1px 2px rgb(29 28 44 / 0.06),
@@ -111,12 +126,12 @@
 }
 
 .tabIcon svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
 }
 
 .tabTitle {
-  font-size: clamp(16px, 1.3vw, 19px);
+  font-size: clamp(15px, 1.2vw, 17.5px);
   font-weight: 500;
   letter-spacing: -0.02em;
   transition: color 0.4s ease;
@@ -125,7 +140,7 @@
 .tabTag {
   font-family: var(--font-mono);
   font-size: 9.5px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--muted);
@@ -136,7 +151,7 @@
   color: var(--on-accent);
 }
 
-.tab[aria-selected="true"] .tabNum,
+.tab[aria-selected="true"] .tabCode,
 .tab[aria-selected="true"] .tabTag {
   color: rgb(246 245 241 / 0.62);
 }
@@ -160,6 +175,8 @@
 }
 
 .pane {
+  display: flex;
+  flex-direction: column;
   grid-area: 1 / 1;
   opacity: 0;
   visibility: hidden;
@@ -205,19 +222,24 @@
   height: 24px;
 }
 
-.paneCount {
+.paneRef {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent);
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-align: right;
+  color: var(--on-accent);
 }
 
 .paneTitle {
   margin-top: 22px;
-  font-size: clamp(28px, 2.6vw, 40px);
+  font-size: clamp(26px, 2.4vw, 38px);
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.02;
   letter-spacing: -0.045em;
+  text-wrap: balance;
   color: var(--ink);
 }
 
@@ -244,7 +266,7 @@
 }
 
 .fact {
-  padding: 16px 0;
+  padding: 15px 0;
   border-bottom: 1px solid var(--line);
 }
 
@@ -290,7 +312,17 @@
   color: var(--ink-2);
 }
 
-/* ---------------------------------------------------------- deploy gate */
+.paneCount {
+  margin-top: auto;
+  padding-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-align: right;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------- DevSecOps pipeline */
 
 .gate {
   margin-top: clamp(20px, 2.4vw, 28px);
@@ -303,23 +335,35 @@
 .gateHead {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 10px 24px;
+  gap: 12px 32px;
+}
+
+.gateLabel {
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .gateTitle {
-  font-size: clamp(18px, 1.5vw, 22px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 
 .gateNote {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  max-width: 34em;
   font-size: 13px;
+  line-height: 1.5;
   color: var(--ink-3);
 }
 
@@ -327,13 +371,14 @@
   flex: none;
   width: 15px;
   height: 15px;
+  margin-top: 2px;
   color: #b23a2e;
 }
 
 /* A light pulse runs from push to deploy; each check lights as it passes. */
 .line {
-  --dot: 40px;
-  --cycle: 6.4s;
+  --dot: 38px;
+  --cycle: 7.2s;
   position: relative;
   margin-top: 30px;
 }
@@ -368,19 +413,19 @@
   }
 }
 
-/* Without motion, a frozen pulse would read as part of the track. */
-@media (prefers-reduced-motion: reduce) {
-  .runner {
-    display: none;
-  }
-}
-
 @keyframes run-down {
   from {
     transform: translateY(-100%);
   }
   to {
     transform: translateY(560%);
+  }
+}
+
+/* Without motion, a frozen pulse would read as part of the track. */
+@media (prefers-reduced-motion: reduce) {
+  .runner {
+    display: none;
   }
 }
 
@@ -394,7 +439,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   padding: 0 4px;
   text-align: center;
 }
@@ -416,8 +461,8 @@
 }
 
 .stationDot svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
 .stationDot i {
@@ -446,7 +491,7 @@
 }
 
 .station b {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -457,6 +502,78 @@
   font-size: 9.5px;
   letter-spacing: 0.04em;
   color: var(--ink-3);
+}
+
+/* practice · tool · what it catches · what blocks */
+.practices {
+  width: 100%;
+  margin-top: 30px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.practices th,
+.practices td {
+  padding: 13px 14px 13px 0;
+  border-top: 1px solid rgb(29 28 44 / 0.1);
+  vertical-align: baseline;
+}
+
+.practices thead th {
+  padding-top: 0;
+  border-top: 0;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.practices tbody th {
+  width: 26%;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.tool {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid rgb(29 28 44 / 0.1);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.6);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.catches {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.blocks {
+  font-size: 12.5px;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.blocks i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #b23a2e;
+  vertical-align: 1px;
+}
+
+.practices tbody tr:last-child .blocks i {
+  background: var(--muted);
 }
 
 /* ---------------------------------------------------------------- stats */
@@ -514,11 +631,15 @@
   }
 
   .tab {
-    grid-template-columns: 26px 34px minmax(0, 1fr);
+    grid-template-columns: 38px 32px minmax(0, 1fr);
+  }
+
+  .station small {
+    display: none;
   }
 }
 
-/* Every layer as its own card; no tabs to pick from. */
+/* Every risk as its own card; no list to pick from. */
 @media (max-width: 900px) {
   .head {
     grid-template-columns: minmax(0, 1fr);
@@ -528,7 +649,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .tabs {
+  .side {
     display: none;
   }
 
@@ -567,7 +688,7 @@
   }
 }
 
-/* The gate runs top to bottom. */
+/* The pipeline runs top to bottom, and each practice becomes a small card. */
 @media (max-width: 760px) {
   .track {
     top: calc(var(--dot) / 2);
@@ -589,17 +710,22 @@
 
   .stations {
     grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+    gap: 10px;
   }
 
   .station {
     display: grid;
     grid-template-columns: var(--dot) minmax(0, 1fr);
     column-gap: 14px;
-    row-gap: 2px;
+    row-gap: 1px;
     align-items: center;
     padding: 0;
     text-align: left;
+  }
+
+  .station small {
+    display: block;
+    align-self: start;
   }
 
   .stationDot {
@@ -611,7 +737,32 @@
     align-self: end;
   }
 
-  .station small {
-    align-self: start;
+  .practices thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .practices tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    padding: 14px 0;
+    border-top: 1px solid rgb(29 28 44 / 0.1);
+  }
+
+  .practices tbody th,
+  .practices tbody td {
+    width: auto;
+    padding: 0;
+    border-top: 0;
+  }
+
+  .practices .catches,
+  .practices .blocks {
+    grid-column: 1 / -1;
   }
 }

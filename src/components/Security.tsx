@@ -2,30 +2,51 @@
 
 import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import type { Content } from "@/content/portfolio";
+import type { RiskIcon } from "@/content/services";
 import { useMediaQuery } from "@/lib/hooks";
 import { cx, pad } from "@/lib/utils";
-import { Alert, ArrowUpRight, Check, Eyebrow, FileCheck, Key, Lock, Pipeline, Server, Shield, Spark, Wallet } from "./ui";
+import {
+  Activity,
+  Alert,
+  ArrowUpRight,
+  Check,
+  Code,
+  Eyebrow,
+  Key,
+  Lock,
+  Pipeline,
+  Server,
+  Shield,
+  Spark,
+  UserCheck,
+  Wallet,
+} from "./ui";
 import styles from "./Security.module.css";
 
-const ICONS: Record<string, typeof Key> = {
-  identity: Key,
-  access: Lock,
-  payments: Wallet,
-  uploads: FileCheck,
-  ai: Spark,
+const ICONS: Record<RiskIcon, typeof Key> = {
+  lock: Lock,
+  server: Server,
   pipeline: Pipeline,
-  runtime: Server,
+  key: Key,
+  code: Code,
+  wallet: Wallet,
+  user: UserCheck,
+  shield: Shield,
+  activity: Activity,
+  alert: Alert,
+  spark: Spark,
 };
 
 type Props = { num: string; content: Content["security"] };
 
 /**
- * KamJob's security, layer by layer: pick a layer (hover, click or arrow keys)
- * to see the threat, what stops it and how that is proven. Below it, the gate
- * every push goes through before production.
+ * KamJob's security, mapped to the OWASP Top 10:2025 (and the LLM Top 10):
+ * pick a risk (hover, click or arrow keys) to see the threat, what stops it
+ * and how that is proven. Below it, the DevSecOps checks every push goes
+ * through before production.
  */
 export default function Security({ num, content }: Props) {
-  const { layers, gate } = content;
+  const { risks, pipeline } = content;
   const [active, setActive] = useState(0);
   const stacked = useMediaQuery("(max-width: 900px)");
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -37,11 +58,11 @@ export default function Security({ num, content }: Props) {
       ArrowUp: active - 1,
       ArrowLeft: active - 1,
       Home: 0,
-      End: layers.length - 1,
+      End: risks.length - 1,
     };
     if (!(e.key in keys)) return;
     e.preventDefault();
-    const to = (keys[e.key] + layers.length) % layers.length;
+    const to = (keys[e.key] + risks.length) % risks.length;
     setActive(to);
     tabsRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[to]?.focus();
   };
@@ -65,64 +86,66 @@ export default function Security({ num, content }: Props) {
         </div>
 
         <div className={styles.explorer} data-reveal>
-          <div
-            ref={tabsRef}
-            className={styles.tabs}
-            role="tablist"
-            aria-orientation="vertical"
-            aria-label={content.layersLabel}
-            onKeyDown={onKeyDown}
-          >
-            {layers.map((layer, i) => {
-              const Icon = ICONS[layer.id] ?? Shield;
-              const selected = i === active;
-              return (
-                <button
-                  key={layer.id}
-                  type="button"
-                  role="tab"
-                  id={`layer-tab-${layer.id}`}
-                  aria-selected={selected}
-                  aria-controls={`layer-${layer.id}`}
-                  tabIndex={selected ? 0 : -1}
-                  className={styles.tab}
-                  onClick={() => setActive(i)}
-                  onMouseEnter={() => setActive(i)}
-                >
-                  <span className={styles.tabNum}>{pad(i + 1)}</span>
-                  <span className={styles.tabIcon}>
-                    <Icon />
-                  </span>
-                  <span className={styles.tabTitle}>{layer.title}</span>
-                  <span className={styles.tabTag}>{layer.tags[0]}</span>
-                </button>
-              );
-            })}
+          <div className={styles.side}>
+            <p className={styles.listLabel}>{content.risksLabel}</p>
+            <div
+              ref={tabsRef}
+              className={styles.tabs}
+              role="tablist"
+              aria-orientation="vertical"
+              aria-label={content.risksLabel}
+              onKeyDown={onKeyDown}
+            >
+              {risks.map((risk, i) => {
+                const Icon = ICONS[risk.icon];
+                const selected = i === active;
+                return (
+                  <button
+                    key={risk.code}
+                    type="button"
+                    role="tab"
+                    id={`risk-tab-${risk.code}`}
+                    aria-selected={selected}
+                    aria-controls={`risk-${risk.code}`}
+                    tabIndex={selected ? 0 : -1}
+                    className={styles.tab}
+                    data-llm={risk.code === "LLM" || undefined}
+                    onClick={() => setActive(i)}
+                    onMouseEnter={() => setActive(i)}
+                  >
+                    <span className={styles.tabCode}>{risk.code}</span>
+                    <span className={styles.tabIcon}>
+                      <Icon />
+                    </span>
+                    <span className={styles.tabTitle}>{risk.short}</span>
+                    <span className={styles.tabTag}>{risk.tags[0]}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className={styles.panes}>
-            {layers.map((layer, i) => {
-              const Icon = ICONS[layer.id] ?? Shield;
+            {risks.map((risk, i) => {
+              const Icon = ICONS[risk.icon];
               return (
                 <article
-                  key={layer.id}
-                  id={`layer-${layer.id}`}
+                  key={risk.code}
+                  id={`risk-${risk.code}`}
                   className={styles.pane}
                   data-active={stacked || i === active || undefined}
                   role={stacked ? undefined : "tabpanel"}
-                  aria-labelledby={stacked ? undefined : `layer-tab-${layer.id}`}
+                  aria-labelledby={stacked ? undefined : `risk-tab-${risk.code}`}
                 >
                   <p className={styles.paneTop}>
                     <span className={styles.paneIcon}>
                       <Icon />
                     </span>
-                    <span className={styles.paneCount}>
-                      {pad(i + 1)} / {pad(layers.length)}
-                    </span>
+                    <span className={styles.paneRef}>OWASP · {risk.ref}</span>
                   </p>
-                  <h3 className={styles.paneTitle}>{layer.title}</h3>
+                  <h3 className={styles.paneTitle}>{risk.title}</h3>
                   <ul className={styles.tags}>
-                    {layer.tags.map((tag) => (
+                    {risk.tags.map((tag) => (
                       <li key={tag}>{tag}</li>
                     ))}
                   </ul>
@@ -131,21 +154,24 @@ export default function Security({ num, content }: Props) {
                       <dt>
                         <Alert /> {content.threat}
                       </dt>
-                      <dd>{layer.threat}</dd>
+                      <dd>{risk.threat}</dd>
                     </div>
                     <div className={styles.fact} data-kind="defense">
                       <dt>
                         <Shield /> {content.defense}
                       </dt>
-                      <dd>{layer.defense}</dd>
+                      <dd>{risk.defense}</dd>
                     </div>
                     <div className={styles.fact} data-kind="proof">
                       <dt>
                         <Check /> {content.proof}
                       </dt>
-                      <dd>{layer.proof}</dd>
+                      <dd>{risk.proof}</dd>
                     </div>
                   </dl>
+                  <p className={styles.paneCount}>
+                    {pad(i + 1)} / {pad(risks.length)}
+                  </p>
                 </article>
               );
             })}
@@ -154,18 +180,22 @@ export default function Security({ num, content }: Props) {
 
         <div className={styles.gate} data-reveal>
           <div className={styles.gateHead}>
-            <p className={styles.gateTitle}>{gate.title}</p>
+            <div>
+              <p className={styles.gateLabel}>{pipeline.label}</p>
+              <h3 className={styles.gateTitle}>{pipeline.title}</h3>
+            </div>
             <p className={styles.gateNote}>
-              <Alert /> {gate.note}
+              <Alert /> {pipeline.note}
             </p>
           </div>
-          <div className={styles.line} style={{ "--n": gate.stations.length } as CSSProperties}>
+
+          <div className={styles.line} style={{ "--n": pipeline.stations.length } as CSSProperties}>
             <span className={styles.track} aria-hidden="true">
               <i className={styles.runner} />
             </span>
             <ol className={styles.stations}>
-              {gate.stations.map((station, i) => {
-                const last = i === gate.stations.length - 1;
+              {pipeline.stations.map((station, i) => {
+                const last = i === pipeline.stations.length - 1;
                 return (
                   <li
                     key={station.name}
@@ -181,6 +211,32 @@ export default function Security({ num, content }: Props) {
               })}
             </ol>
           </div>
+
+          <table className={styles.practices}>
+            <thead>
+              <tr>
+                <th scope="col">{pipeline.columns.practice}</th>
+                <th scope="col">{pipeline.columns.tool}</th>
+                <th scope="col">{pipeline.columns.catches}</th>
+                <th scope="col">{pipeline.columns.gate}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pipeline.practices.map((row) => (
+                <tr key={row.practice}>
+                  <th scope="row">{row.practice}</th>
+                  <td>
+                    <span className={styles.tool}>{row.tool}</span>
+                  </td>
+                  <td className={styles.catches}>{row.catches}</td>
+                  <td className={styles.blocks}>
+                    <i aria-hidden="true" />
+                    {row.gate}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         <div className={styles.stats} data-reveal>

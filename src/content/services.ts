@@ -1,11 +1,12 @@
 /**
  * How I can help and how I work: the services offer, the method with its
- * principles, and the KamJob security deep-dive.
+ * principles, and the KamJob security deep-dive (OWASP Top 10 and the CI
+ * pipeline that enforces it).
  *
  * Every security and scaling claim below was checked against the KamJob
- * repositories (backend auth, payments, uploads, agents, CI workflows,
- * Dockerfile) before it was written. Keep it that way: describe what the code
- * does, never what it might do.
+ * repositories (backend auth, payments, uploads, agents, monitoring, CI
+ * workflows, Dockerfile) before it was written. Keep it that way: describe
+ * what the code does, never what it might do.
  */
 
 import { page, t, type Tr } from "@/lib/i18n";
@@ -224,112 +225,91 @@ export const approach = {
 
 /* ---------------------------------------------------------------- security */
 
-type Layer = {
-  id: string;
+export type RiskIcon =
+  | "lock"
+  | "server"
+  | "pipeline"
+  | "key"
+  | "code"
+  | "wallet"
+  | "user"
+  | "shield"
+  | "activity"
+  | "alert"
+  | "spark";
+
+type Risk = {
+  /** Short code for the list: "A01", or "LLM" for the LLM Top 10 entry. */
+  code: string;
+  /** Full OWASP reference shown on the card. */
+  ref: string;
+  /** Short name for the list. */
+  short: Tr;
+  /** The OWASP category's name. */
   title: Tr;
+  icon: RiskIcon;
   tags: (string | Tr)[];
   threat: Tr;
   defense: Tr;
   proof: Tr;
 };
 
-const layers: Layer[] = [
+/** OWASP Top 10:2025, then the OWASP Top 10 for LLM Applications (2025) — each answered by what KamJob does. */
+const risks: Risk[] = [
   {
-    id: "identity",
-    title: t("Identity", "Identité"),
-    tags: ["JWT", "RS256", "JWKS"],
-    threat: t(
-      "A hand-made token that claims to be someone else — the admin included.",
-      "Un jeton fabriqué à la main qui se fait passer pour quelqu’un d’autre — l’administrateur compris.",
-    ),
-    defense: t(
-      "Every session token is verified before it is believed: RS256 signature against the identity provider’s published keys, expiry, not-before and the app that issued it. If the keys can’t be reached, the API refuses — it never waves a request through.",
-      "Chaque jeton de session est vérifié avant d’être cru : signature RS256 contre les clés publiées du fournisseur d’identité, expiration, date de validité et application émettrice. Si les clés sont injoignables, l’API refuse — elle ne laisse jamais passer une requête non vérifiée.",
-    ),
-    proof: t(
-      "Tests replay what an attacker tries first: an unsigned token, “alg: none”, the wrong key, the public key used as an HS256 secret.",
-      "Des tests rejouent ce qu’un attaquant tente en premier : jeton non signé, « alg: none », mauvaise clé, clé publique utilisée comme secret HS256.",
-    ),
-  },
-  {
-    id: "access",
-    title: t("Permissions", "Droits d’accès"),
-    tags: ["RBAC", t("Ownership checks", "Contrôle du propriétaire"), t("Signed webhooks", "Webhooks signés")],
+    code: "A01",
+    ref: "A01:2025",
+    short: t("Access control", "Contrôle d’accès"),
+    title: t("Broken Access Control", "Contrôle d’accès défaillant"),
+    icon: "lock",
+    tags: ["RBAC", t("Ownership checks", "Contrôle du propriétaire"), t("Admin approval", "Validation admin")],
     threat: t(
       "A user who promotes themselves to employer, or opens someone else’s CV by changing an ID in the URL.",
       "Un utilisateur qui s’attribue le rôle d’employeur, ou ouvre le CV d’un autre en changeant un identifiant dans l’URL.",
     ),
     defense: t(
-      "Roles come only from server-side metadata no user can edit, and employer access goes through admin approval. Every document, payment, notification and job offer is checked against its owner before it is returned or changed.",
-      "Les rôles ne viennent que de métadonnées côté serveur qu’aucun utilisateur ne peut modifier, et l’accès employeur passe par une validation de l’administrateur. Chaque document, paiement, notification et offre est vérifié contre son propriétaire avant d’être renvoyé ou modifié.",
+      "Roles come only from server-side metadata no user can edit, and employer access goes through admin approval. Every document, payment, notification and job offer is checked against its owner on the server before it is returned or changed.",
+      "Les rôles ne viennent que de métadonnées côté serveur qu’aucun utilisateur ne peut modifier, et l’accès employeur passe par une validation de l’administrateur. Chaque document, paiement, notification et offre est vérifié côté serveur contre son propriétaire avant d’être renvoyé ou modifié.",
     ),
     proof: t(
-      "Identity webhooks must be signed: an unsigned event is refused, so nobody can re-point an account by posting a fake update.",
-      "Les webhooks d’identité doivent être signés : un événement non signé est refusé, personne ne peut détourner un compte avec une fausse mise à jour.",
+      "Cross-account reads and edits answer 403, and files are served through short-lived signed links issued only to someone allowed to see them.",
+      "Lire ou modifier ce qui appartient à un autre compte renvoie 403, et les fichiers passent par des liens signés à courte durée de vie, délivrés seulement à qui a le droit de les voir.",
     ),
   },
   {
-    id: "payments",
-    title: t("Payments", "Paiements"),
-    tags: ["Mobile Money", "HMAC-SHA256", t("Idempotency", "Idempotence")],
+    code: "A02",
+    ref: "A02:2025",
+    short: t("Misconfiguration", "Configuration"),
+    title: t("Security Misconfiguration", "Mauvaise configuration de sécurité"),
+    icon: "server",
+    tags: ["Docker", "CSP · HSTS", t("XML parsing", "Parsing XML")],
     threat: t(
-      "A forged “payment successful” callback that unlocks Premium for free — or one payment granting access twice.",
-      "Un faux rappel « paiement réussi » qui débloque le Premium gratuitement — ou un même paiement qui ouvre l’accès deux fois.",
+      "Unsafe defaults: a container running as root, metrics left open, an XML parser that follows external entities.",
+      "Des réglages par défaut dangereux : un conteneur qui tourne en root, des métriques laissées ouvertes, un parseur XML qui suit les entités externes.",
     ),
     defense: t(
-      "A callback is a hint, never proof: the status and the amount are re-read from the payment provider. Signed callbacks are checked with HMAC-SHA256 in constant time, and the move from pending to paid is claimed once, atomically.",
-      "Un rappel est un indice, jamais une preuve : le statut et le montant sont relus chez le prestataire de paiement. Les rappels signés sont vérifiés en HMAC-SHA256 à temps constant, et le passage de « en attente » à « payé » n’est accordé qu’une fois, de façon atomique.",
+      "A pinned Alpine image, patched at build time, running as a non-root user. Metrics need a token and stay closed in production if none is set. Uploaded documents are parsed with any DTD refused and their decompressed size capped, and the public site ships a strict CSP and HSTS.",
+      "Une image Alpine figée, corrigée au build, qui tourne sans privilèges root. Les métriques exigent un jeton et restent fermées en production s’il n’est pas défini. Les documents reçus sont lus avec toute DTD refusée et une taille décompressée plafonnée, et le site public impose une CSP stricte et HSTS.",
     ),
     proof: t(
-      "A transaction worth less than the price activates nothing, and each purchase is its own receipt, kept for refunds and audits.",
-      "Une transaction inférieure au prix n’active rien, et chaque achat est un reçu distinct, conservé pour les remboursements et les audits.",
+      "Trivy checks the Dockerfile on every push, and XXE, “billion laughs” and zip-bomb files are replayed as tests that must be refused.",
+      "Trivy contrôle le Dockerfile à chaque push, et des fichiers XXE, « billion laughs » et bombe zip sont rejoués en tests qui doivent être refusés.",
     ),
   },
   {
-    id: "uploads",
-    title: t("File uploads", "Fichiers envoyés"),
-    tags: ["XXE", t("Zip bombs", "Bombes zip"), t("Signed URLs", "URL signées")],
+    code: "A03",
+    ref: "A03:2025",
+    short: t("Supply chain", "Chaîne d’approvisionnement"),
+    title: t("Software Supply Chain Failures", "Défaillances de la chaîne d’approvisionnement logicielle"),
+    icon: "pipeline",
+    tags: ["SCA", t("Secret scanning", "Détection de secrets"), t("SHA-pinned CI", "CI figée par SHA")],
     threat: t(
-      "A “CV” that is really an attack: XML entities that read server files, nested entities that expand into gigabytes, a zip bomb.",
-      "Un « CV » qui est en réalité une attaque : entités XML qui lisent les fichiers du serveur, entités imbriquées qui enflent jusqu’à des gigaoctets, bombe zip.",
+      "A vulnerable package, a key left in Git history, or a CI action whose tag an attacker has moved to their own code.",
+      "Un paquet vulnérable, une clé oubliée dans l’historique Git, ou une action de CI dont un attaquant a déplacé le tag vers son propre code.",
     ),
     defense: t(
-      "Uploaded documents are parsed as hostile input: any DTD is refused, entities never expand and the decompressed size is capped. Files go straight to storage through signed links that expire in 15 minutes, checked against their owner.",
-      "Les documents reçus sont lus comme des entrées hostiles : toute DTD est refusée, aucune entité n’est développée et la taille décompressée est plafonnée. Les fichiers vont directement au stockage par des liens signés qui expirent en 15 minutes, vérifiés contre leur propriétaire.",
-    ),
-    proof: t(
-      "Each attack is a test — XXE, “billion laughs”, zip bomb — and must be refused like any unreadable file.",
-      "Chaque attaque est un test — XXE, « billion laughs », bombe zip — et doit être refusée comme n’importe quel fichier illisible.",
-    ),
-  },
-  {
-    id: "ai",
-    title: t("AI", "IA"),
-    tags: [t("Prompt injection", "Injection de prompt"), t("JSON schemas", "Schémas JSON")],
-    threat: t(
-      "Instructions hidden in a job offer or a CV, or a model that invents experience the candidate doesn’t have.",
-      "Des instructions cachées dans une offre ou un CV, ou un modèle qui invente une expérience que le candidat n’a pas.",
-    ),
-    defense: t(
-      "Offers and profiles reach the model as tagged data that can’t close its own block — never as orders — and it is told to invent nothing. The model writes, the code decides: structured answers follow a JSON schema, and layout and rules stay in code.",
-      "Offres et profils arrivent au modèle comme des données balisées qui ne peuvent pas fermer leur bloc — jamais comme des ordres — avec l’interdiction d’inventer quoi que ce soit. Le modèle rédige, le code décide : les réponses structurées suivent un schéma JSON, la mise en page et les règles restent dans le code.",
-    ),
-    proof: t(
-      "If the model refuses or drifts, a check catches it and the candidate’s own documents are sent unchanged.",
-      "Si le modèle refuse ou dérive, un contrôle l’intercepte et les documents d’origine du candidat sont envoyés tels quels.",
-    ),
-  },
-  {
-    id: "pipeline",
-    title: t("Supply chain", "Chaîne de livraison"),
-    tags: ["gitleaks", "Trivy", "Snyk"],
-    threat: t(
-      "A leaked secret, a vulnerable dependency, or a CI action whose tag an attacker has moved to their own code.",
-      "Un secret divulgué, une dépendance vulnérable, ou une action de CI dont un attaquant a déplacé le tag vers son propre code.",
-    ),
-    defense: t(
-      "Five scanners gate every deploy: secrets, Dockerfile, dependencies, code and the container image. Any HIGH finding blocks the release, and a scan that didn’t run counts as a failure. CI actions are pinned to commit SHAs, and tokens reach only the steps that need them.",
-      "Cinq analyses conditionnent chaque déploiement : secrets, Dockerfile, dépendances, code et image du conteneur. Toute faille HIGH bloque la mise en production, et une analyse qui n’a pas tourné compte comme un échec. Les actions de CI sont figées sur un SHA de commit, et les jetons ne vont qu’aux étapes qui en ont besoin.",
+      "SCA scans every dependency that ships, secret scanning covers the whole Git history, and the built image is scanned for vulnerable OS packages. Every CI action is pinned to a commit SHA, Dependabot keeps those pins current, and tokens reach only the steps that need them.",
+      "La SCA analyse chaque dépendance livrée, la détection de secrets couvre tout l’historique Git, et l’image construite est analysée pour ses paquets système vulnérables. Chaque action de CI est figée sur un SHA de commit, Dependabot tient ces versions à jour, et les jetons ne vont qu’aux étapes qui en ont besoin.",
     ),
     proof: t(
       "Tests fail the build if an action is left unpinned or a token reaches a whole job.",
@@ -337,21 +317,228 @@ const layers: Layer[] = [
     ),
   },
   {
-    id: "runtime",
-    title: t("Runtime", "Exécution"),
-    tags: ["Docker", t("Health probes", "Sondes de santé"), "Prometheus"],
+    code: "A04",
+    ref: "A04:2025",
+    short: t("Cryptography", "Cryptographie"),
+    title: t("Cryptographic Failures", "Défaillances cryptographiques"),
+    icon: "key",
+    tags: ["RS256", "HMAC-SHA256", t("Constant-time", "Temps constant")],
     threat: t(
-      "A container running as root, a health check that restarts healthy servers, a metrics page that leaks your business numbers.",
-      "Un conteneur qui tourne en root, une sonde qui redémarre des serveurs sains, une page de métriques qui laisse fuiter vos chiffres.",
+      "Crypto that looks right but isn’t: tokens accepted with a weak or missing signature, secrets compared in a way that leaks them byte by byte.",
+      "Une crypto qui semble juste mais ne l’est pas : jetons acceptés avec une signature faible ou absente, secrets comparés d’une façon qui les laisse fuiter octet par octet.",
     ),
     defense: t(
-      "A pinned Alpine image that takes security patches at build time and runs as a non-root user. Liveness never touches the database; readiness does. Metrics need a token compared in constant time — and stay closed in production if none is set.",
-      "Une image Alpine figée, qui intègre les correctifs de sécurité au build et tourne sans privilèges root. La sonde de vie ne touche jamais la base ; celle de disponibilité, si. Les métriques exigent un jeton comparé à temps constant — et restent fermées en production s’il n’est pas défini.",
+      "Session tokens are accepted with RS256 only, so “alg: none” and key-confusion tricks fail. Webhook signatures are HMAC-SHA256 over the raw body, and every token and signature comparison runs in constant time. Passwords never reach the API: sign-in is delegated to a dedicated identity provider.",
+      "Les jetons de session ne sont acceptés qu’en RS256 : « alg: none » et les confusions de clés échouent. Les signatures de webhook sont des HMAC-SHA256 calculés sur le corps brut, et toute comparaison de jeton ou de signature se fait à temps constant. Les mots de passe n’atteignent jamais l’API : la connexion est déléguée à un fournisseur d’identité dédié.",
     ),
     proof: t(
-      "The image is built, started and smoke-tested in CI before anything ships.",
-      "L’image est construite, démarrée et testée en CI avant toute livraison.",
+      "The token tests include the classic key-confusion attack: an HS256 token signed with the public key.",
+      "Les tests de jetons incluent l’attaque classique par confusion de clés : un jeton HS256 signé avec la clé publique.",
     ),
+  },
+  {
+    code: "A05",
+    ref: "A05:2025",
+    short: t("Injection", "Injection"),
+    title: t("Injection", "Injection"),
+    icon: "code",
+    tags: ["SQLAlchemy", "Pydantic", "SAST"],
+    threat: t(
+      "Hostile input reaching an interpreter: SQL built from what a user typed, or markup that smuggles code into a page or a document.",
+      "Une entrée hostile qui atteint un interpréteur : du SQL construit à partir de ce qu’un utilisateur a saisi, ou du balisage qui glisse du code dans une page ou un document.",
+    ),
+    defense: t(
+      "No SQL is built from strings: queries go through SQLAlchemy with bound parameters, raw SQL included. Request bodies are validated by Pydantic schemas, and free-text fields are cleaned of control characters before their length is checked.",
+      "Aucun SQL n’est construit à partir de chaînes : les requêtes passent par SQLAlchemy avec des paramètres liés, SQL brut compris. Les corps de requête sont validés par des schémas Pydantic, et les champs libres sont nettoyés des caractères de contrôle avant le contrôle de longueur.",
+    ),
+    proof: t(
+      "SAST (Snyk Code) reads the source on every push, and any HIGH finding blocks the release.",
+      "Le SAST (Snyk Code) relit le code à chaque push, et toute faille HIGH bloque la mise en production.",
+    ),
+  },
+  {
+    code: "A06",
+    ref: "A06:2025",
+    short: t("Insecure design", "Conception"),
+    title: t("Insecure Design", "Conception non sécurisée"),
+    icon: "wallet",
+    tags: ["Mobile Money", t("Idempotency", "Idempotence"), t("Advisory locks", "Verrous consultatifs")],
+    threat: t(
+      "Logic that works as coded but can be gamed: paying less than the price, one payment unlocking access twice, a cheap pass buying days of a higher plan.",
+      "Une logique qui fonctionne comme codée mais qu’on peut détourner : payer moins que le prix, un même paiement qui ouvre l’accès deux fois, un pass bon marché qui achète des jours d’une offre supérieure.",
+    ),
+    defense: t(
+      "The payment flow is designed around abuse: the amount is re-checked against the price, the move to “paid” is claimed once by a guarded update, and each purchase opens its own access window, placed under a lock so two purchases can’t collide.",
+      "Le parcours de paiement est conçu contre les abus : le montant est recontrôlé par rapport au prix, le passage à « payé » n’est accordé qu’une fois par une mise à jour gardée, et chaque achat ouvre sa propre fenêtre d’accès, placée sous verrou pour que deux achats ne se télescopent pas.",
+    ),
+    proof: t(
+      "Each purchase is its own receipt, kept for refunds and audits.",
+      "Chaque achat est un reçu distinct, conservé pour les remboursements et les audits.",
+    ),
+  },
+  {
+    code: "A07",
+    ref: "A07:2025",
+    short: t("Authentication", "Authentification"),
+    title: t("Authentication Failures", "Défaillances d’authentification"),
+    icon: "user",
+    tags: ["JWT", "JWKS", t("Fail closed", "Échec fermé")],
+    threat: t(
+      "A hand-made token that claims to be someone else — the admin included.",
+      "Un jeton fabriqué à la main qui se fait passer pour quelqu’un d’autre — l’administrateur compris.",
+    ),
+    defense: t(
+      "Every session token is verified before it is believed: signature against the identity provider’s published keys, expiry, not-before and the app that issued it. If the keys can’t be reached, the API refuses — it never waves a request through.",
+      "Chaque jeton de session est vérifié avant d’être cru : signature contre les clés publiées du fournisseur d’identité, expiration, date de validité et application émettrice. Si les clés sont injoignables, l’API refuse — elle ne laisse jamais passer une requête non vérifiée.",
+    ),
+    proof: t(
+      "Tests replay what an attacker tries first: an unsigned token, “alg: none”, a token signed with the wrong key.",
+      "Des tests rejouent ce qu’un attaquant tente en premier : jeton non signé, « alg: none », jeton signé avec la mauvaise clé.",
+    ),
+  },
+  {
+    code: "A08",
+    ref: "A08:2025",
+    short: t("Data integrity", "Intégrité des données"),
+    title: t("Software or Data Integrity Failures", "Défaillances d’intégrité des logiciels ou des données"),
+    icon: "shield",
+    tags: ["Svix", "HMAC", t("Server-side re-check", "Revérification serveur")],
+    threat: t(
+      "Trusting data nobody verified: a forged “payment successful” callback, or a fake account update posted to a webhook.",
+      "Faire confiance à des données non vérifiées : un faux rappel « paiement réussi », ou une fausse mise à jour de compte postée sur un webhook.",
+    ),
+    defense: t(
+      "Identity webhooks must carry a valid signature, and are refused outright when no secret is configured. A payment callback is a hint, never proof: status and amount are re-read from the payment provider, and signed callbacks are checked with HMAC-SHA256.",
+      "Les webhooks d’identité doivent porter une signature valide, et sont refusés d’office si aucun secret n’est configuré. Un rappel de paiement est un indice, jamais une preuve : statut et montant sont relus chez le prestataire, et les rappels signés sont vérifiés en HMAC-SHA256.",
+    ),
+    proof: t(
+      "A forged callback can’t grant a subscription — at most, it triggers a re-check with the provider.",
+      "Un faux rappel ne peut pas accorder d’abonnement — au pire, il déclenche une revérification auprès du prestataire.",
+    ),
+  },
+  {
+    code: "A09",
+    ref: "A09:2025",
+    short: t("Logging & alerting", "Journalisation & alertes"),
+    title: t("Security Logging & Alerting Failures", "Défaillances de journalisation et d’alerte"),
+    icon: "activity",
+    tags: ["Sentry", "Prometheus", t("Request IDs", "ID de requête")],
+    threat: t(
+      "An attack or an outage that nobody notices until users complain.",
+      "Une attaque ou une panne que personne ne remarque avant les plaintes des utilisateurs.",
+    ),
+    defense: t(
+      "Structured logs carry a request ID, Sentry captures errors and traces, and Prometheus metrics are labelled by route — never by raw URL, so a scanner can’t flood them. AI spend and payment states are measured the same day.",
+      "Des journaux structurés portent un identifiant de requête, Sentry capte erreurs et traces, et les métriques Prometheus sont étiquetées par route — jamais par URL brute, pour qu’un scanner ne puisse pas les saturer. Dépenses d’IA et états des paiements sont mesurés le jour même.",
+    ),
+    proof: t(
+      "A failed startup step is counted on the dashboard instead of disappearing into a log nobody reads.",
+      "Une étape de démarrage en échec est comptée sur le tableau de bord au lieu de disparaître dans un journal que personne ne lit.",
+    ),
+  },
+  {
+    code: "A10",
+    ref: "A10:2025",
+    short: t("Exceptional conditions", "Conditions exceptionnelles"),
+    title: t("Mishandling of Exceptional Conditions", "Mauvaise gestion des conditions exceptionnelles"),
+    icon: "alert",
+    tags: [t("Fail closed", "Échec fermé"), t("Health probes", "Sondes de santé"), t("Safe fallbacks", "Replis sûrs")],
+    threat: t(
+      "Failing open: when a dependency is down or a check can’t run, the system lets things through.",
+      "Échouer en mode ouvert : quand une dépendance tombe ou qu’un contrôle ne peut pas tourner, le système laisse passer.",
+    ),
+    defense: t(
+      "Everything fails closed. No signing keys: 503, not “come in”. A security scan that didn’t complete blocks the deploy. If the AI refuses or drifts, the candidate’s own documents are sent rather than a broken version.",
+      "Tout échoue en mode fermé. Pas de clés de signature : 503, pas « entrez ». Une analyse de sécurité qui n’a pas abouti bloque le déploiement. Si l’IA refuse ou dérive, ce sont les documents d’origine du candidat qui partent, pas une version cassée.",
+    ),
+    proof: t(
+      "Liveness never touches the database, so a database blip can’t make the orchestrator restart healthy containers.",
+      "La sonde de vie ne touche jamais la base : une coupure de la base ne peut pas pousser l’orchestrateur à redémarrer des conteneurs sains.",
+    ),
+  },
+  {
+    code: "LLM",
+    ref: "LLM01 · LLM05 · LLM09 · LLM10",
+    short: t("AI & LLMs", "IA & LLM"),
+    title: t("AI features (OWASP Top 10 for LLMs)", "Fonctionnalités d’IA (OWASP Top 10 LLM)"),
+    icon: "spark",
+    tags: [t("Prompt injection", "Injection de prompt"), t("JSON schemas", "Schémas JSON"), t("Usage quotas", "Quotas d’usage")],
+    threat: t(
+      "Instructions hidden in a job offer or a CV, a model that invents experience, an answer used without checking it, or AI costs that run away.",
+      "Des instructions cachées dans une offre ou un CV, un modèle qui invente une expérience, une réponse utilisée sans vérification, ou des coûts d’IA qui s’emballent.",
+    ),
+    defense: t(
+      "Offers and profiles reach the model as tagged data that can’t close its own block — never as orders — and it is told to invent nothing. Structured answers must match a JSON schema, layout and rules stay in code, and every plan has a metered AI allowance.",
+      "Offres et profils arrivent au modèle comme des données balisées qui ne peuvent pas fermer leur bloc — jamais comme des ordres — avec l’interdiction d’inventer quoi que ce soit. Les réponses structurées doivent respecter un schéma JSON, la mise en page et les règles restent dans le code, et chaque offre dispose d’un quota d’IA mesuré.",
+    ),
+    proof: t(
+      "If the model refuses or drifts, a check catches it and the candidate’s own documents are sent unchanged.",
+      "Si le modèle refuse ou dérive, un contrôle l’intercepte et les documents d’origine du candidat sont envoyés tels quels.",
+    ),
+  },
+];
+
+/** The CI checks that enforce all of the above, in the order a push meets them. */
+const practices: { practice: Tr; tool: string; catches: Tr; gate: Tr }[] = [
+  {
+    practice: t("Secret scanning", "Détection de secrets"),
+    tool: "gitleaks",
+    catches: t("Keys and tokens anywhere in the Git history", "Clés et jetons n’importe où dans l’historique Git"),
+    gate: t("Any finding", "Toute détection"),
+  },
+  {
+    practice: t("IaC scanning", "Analyse IaC"),
+    tool: "Trivy",
+    catches: t("Misconfigurations in the Dockerfile", "Mauvaises configurations du Dockerfile"),
+    gate: t("HIGH or CRITICAL", "HIGH ou CRITICAL"),
+  },
+  {
+    practice: t("SCA · dependency scan", "SCA · analyse des dépendances"),
+    tool: "Snyk Open Source",
+    catches: t(
+      "Known CVEs in every Python package that ships, at the versions the lockfile pins",
+      "CVE connues dans chaque paquet Python livré, aux versions figées par le lockfile",
+    ),
+    gate: t("HIGH or CRITICAL", "HIGH ou CRITICAL"),
+  },
+  {
+    practice: t("SAST · static analysis", "SAST · analyse statique"),
+    tool: "Snyk Code",
+    catches: t("Injection, weak crypto and hard-coded secrets in our own code", "Injections, crypto faible et secrets en dur dans notre propre code"),
+    gate: t("Any HIGH", "Tout HIGH"),
+  },
+  {
+    practice: t("Image build & smoke test", "Build et test de fumée de l’image"),
+    tool: "Docker",
+    catches: t("An image that builds but can’t start, load its libraries or render a CV", "Une image qui se construit mais ne démarre pas, ne charge pas ses bibliothèques ou ne génère pas de CV"),
+    gate: t("Any failure", "Tout échec"),
+  },
+  {
+    practice: t("Container scanning", "Analyse du conteneur"),
+    tool: "Snyk Container",
+    catches: t("Vulnerable OS packages in the image that actually ships", "Paquets système vulnérables dans l’image réellement livrée"),
+    gate: t("Every HIGH, fixable or not", "Tout HIGH, corrigeable ou non"),
+  },
+  {
+    practice: t("Unit & regression tests", "Tests unitaires et de non-régression"),
+    tool: "pytest · 300+",
+    catches: t(
+      "Broken business rules — and each attack above, replayed as a test case",
+      "Règles métier cassées — et chaque attaque ci-dessus, rejouée en cas de test",
+    ),
+    gate: t("Any failure", "Tout échec"),
+  },
+  {
+    practice: t("Static checks", "Contrôles statiques"),
+    tool: "Ruff",
+    catches: t("Undefined names that would crash a screen in production", "Noms non définis qui feraient planter un écran en production"),
+    gate: t("Any finding", "Toute détection"),
+  },
+  {
+    practice: t("Dependency updates", "Mises à jour des dépendances"),
+    tool: "Dependabot",
+    catches: t("Stale pins on the SHA-pinned CI actions", "Versions obsolètes des actions de CI figées par SHA"),
+    gate: t("Weekly pull request", "Pull request hebdomadaire"),
   },
 ];
 
@@ -360,36 +547,45 @@ export const security = {
   title: t("Secure", "Sécurisé"),
   em: t("by design.", "dès la conception."),
   intro: t(
-    "Security isn’t a checklist at the end. In KamJob — a product I designed and run, with real candidates, CVs and Mobile Money payments — it is built into every layer. Pick one to see the threat and what stops it.",
-    "La sécurité n’est pas une checklist de fin de projet. Dans KamJob — un produit que j’ai conçu et que j’exploite, avec de vrais candidats, des CV et des paiements Mobile Money — elle est intégrée à chaque couche. Choisissez-en une pour voir la menace et ce qui l’arrête.",
+    "Security isn’t a checklist at the end. In KamJob — a product I co-founded and engineered, with real candidates, CVs and Mobile Money payments — every defense below answers a risk from the OWASP Top 10:2025. Pick one to see the threat, what stops it and the proof.",
+    "La sécurité n’est pas une checklist de fin de projet. Dans KamJob — un produit que j’ai cofondé et conçu, avec de vrais candidats, des CV et des paiements Mobile Money — chaque défense ci-dessous répond à un risque de l’OWASP Top 10:2025. Choisissez-en un pour voir la menace, ce qui l’arrête et la preuve.",
   ),
   context: t("Case study · KamJob, in production", "Étude de cas · KamJob, en production"),
-  layersLabel: t("Security layers", "Couches de sécurité"),
+  risksLabel: t("OWASP Top 10:2025 · plus the LLM Top 10", "OWASP Top 10:2025 · et le Top 10 LLM"),
   threat: t("The threat", "La menace"),
   defense: t("What stops it", "Ce qui l’arrête"),
   proof: t("Proven by", "La preuve"),
-  layers,
-  gate: {
-    title: t("Every push, before production", "Chaque push, avant la production"),
+  risks,
+  pipeline: {
+    label: t("DevSecOps", "DevSecOps"),
+    title: t("Enforced on every push", "Appliqué à chaque push"),
     note: t(
-      "Any HIGH finding blocks the release. A scan that didn’t run is not a pass.",
-      "Toute faille HIGH bloque la mise en production. Une analyse qui n’a pas tourné n’est pas une réussite.",
+      "Nothing reaches production until every check passes — and a scan that didn’t run counts as a failure, not a pass.",
+      "Rien n’atteint la production tant que tous les contrôles ne sont pas au vert — et une analyse qui n’a pas tourné compte comme un échec, pas comme une réussite.",
     ),
     stations: [
-      { name: t("Push", "Push"), note: "main" },
+      { name: "Push", note: "main" },
       { name: t("Secrets", "Secrets"), note: "gitleaks" },
-      { name: "Dockerfile", note: "Trivy" },
-      { name: t("Dependencies", "Dépendances"), note: "Snyk · SCA" },
-      { name: t("Code", "Code"), note: "Snyk Code · SAST" },
-      { name: t("Image", "Image"), note: t("built, run, scanned", "construite, lancée, analysée") },
-      { name: t("Tests", "Tests"), note: t("300+ tests", "300+ tests") },
-      { name: t("Deploy", "Déploiement"), note: t("only if all pass", "si tout est vert") },
+      { name: "IaC", note: "Trivy" },
+      { name: "SCA", note: "Snyk" },
+      { name: "SAST", note: "Snyk Code" },
+      { name: "Image", note: t("smoke test", "test de fumée") },
+      { name: t("Container", "Conteneur"), note: "Snyk" },
+      { name: t("Tests", "Tests"), note: "pytest" },
+      { name: t("Deploy", "Déploiement"), note: t("all green", "tout au vert") },
     ] as { name: string | Tr; note: string | Tr }[],
+    columns: {
+      practice: t("Practice", "Pratique"),
+      tool: t("Tool", "Outil"),
+      catches: t("What it catches", "Ce qu’elle détecte"),
+      gate: t("Blocks on", "Bloque sur"),
+    },
+    practices,
   },
   stats: [
-    { value: "5", label: t("scanners gate every deploy", "analyses conditionnent chaque déploiement") },
+    { value: "5", label: t("security scanners gate every deploy", "analyses de sécurité conditionnent chaque déploiement") },
     { value: "300", suffix: "+", label: t("automated tests before production", "tests automatisés avant la production") },
-    { value: "15", suffix: " min", label: t("lifetime of an upload link", "durée de vie d’un lien d’envoi") },
+    { value: "10", suffix: "/10", label: t("OWASP Top 10 risks mapped to a defense", "risques OWASP Top 10 associés à une défense") },
     { value: "0", label: t("unpinned CI actions", "action de CI non figée") },
   ] as { value: string; suffix?: string; label: Tr }[],
 };
